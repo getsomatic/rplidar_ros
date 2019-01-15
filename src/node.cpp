@@ -277,12 +277,12 @@ int main(int argc, char * argv[]) {
         if(angle_compensate_multiple < 1)
             angle_compensate_multiple = 1;
         max_distance = current_scan_mode.max_distance;
-        ROS_INFO("current scan mode: %s, max_distance: %.1f m, Point number: %.1fK , angle_compensate: %d",  current_scan_mode.scan_mode,
+        ROS_INFO("%s: current scan mode: %s, max_distance: %.1f m, Point number: %.1fK , angle_compensate: %d", sn.c_str(),  current_scan_mode.scan_mode,
                  current_scan_mode.max_distance, (1000/current_scan_mode.us_per_sample), angle_compensate_multiple);
     }
     else
     {
-        ROS_ERROR("Can not start scan: %08x!", op_result);
+        ROS_ERROR("%s: Can not start scan: %08x!", sn.c_str(), op_result);
     }
 
     ros::Time start_scan_time;
