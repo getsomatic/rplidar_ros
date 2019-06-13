@@ -353,6 +353,12 @@ int main(int argc, char * argv[]) {
                              angle_min, angle_max, max_distance,
                              frame_id);
             }
+        } else {
+            ROS_ERROR("Invalid lidar scan result: %08x!", op_result);
+            if (op_result == RESULT_OPERATION_TIMEOUT){
+                ROS_ERROR("exiting");
+                exit(1);
+            }
         }
 
         ros::spinOnce();
