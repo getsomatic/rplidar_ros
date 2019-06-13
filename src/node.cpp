@@ -36,6 +36,8 @@
 #include "sensor_msgs/LaserScan.h"
 #include "std_srvs/Empty.h"
 #include "rplidar.h"
+#include <ros/package.h>
+#include <string>
 
 #ifndef _countof
 #define _countof(_Array) (int)(sizeof(_Array) / sizeof(_Array[0]))
@@ -183,6 +185,27 @@ static float getAngle(const rplidar_response_measurement_node_hq_t& node)
     return node.angle_z_q14 * 90.f / 16384.f;
 }
 
+std::string GetPort(std::string name, int number) {
+    FILE *fp;
+    std::string roott = ros::package::getPath("robot_cleaner_core");
+    std::stringstream ss;
+    ss << number;
+    std::string path = roott + "/scripts/get_serial_port.py '" + name + "' " + ss.str();
+    fp = popen(path.c_str(), "r");
+    if (fp == NULL) {
+        ROS_ERROR_STREAM_NAMED("vehicle_controller", "failed to run command");
+        return "";
+    }
+
+    std::string res;
+    char s[1035];
+    while (fgets(s, sizeof(s)-1, fp) != NULL) {
+        res += s;
+    }
+    pclose(fp);
+    return res;
+}
+
 int main(int argc, char * argv[]) {
     ros::init(argc, argv, "rplidar_node");
 
@@ -197,7 +220,13 @@ int main(int argc, char * argv[]) {
     ros::NodeHandle nh;
 
     ros::NodeHandle nh_private("~");
-    nh_private.param<std::string>("serial_port", serial_port, "/dev/ttyUSB0");
+    std::string portName;
+    int portNumber;
+    nh_private.param<std::string>("port_name", portName, "");
+    nh_private.param<int>("port_num", portNumber, 1);
+    serial_port = GetPort(portName, portNumber);
+    ROS_INFO_STREAM("port  name: " << portName << " num: " << portNumber << " port: " << serial_port);
+    //nh_private.param<std::string>("serial_port", serial_port, "/dev/ttyUSB0");
     nh_private.param<int>("serial_baudrate", serial_baudrate, 115200/*256000*/);//ros run for A1 A2, change to 256000 if A3
     nh_private.param<std::string>("frame_id", frame_id, "laser_frame");
     nh_private.param<bool>("inverted", inverted, false);
