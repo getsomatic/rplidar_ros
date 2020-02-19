@@ -11,7 +11,7 @@ FILE(GLOB RPLIDAR_SDK_SRC
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-    roslib
+  roslib
   rosconsole
   sensor_msgs
 )

@@ -187,7 +187,7 @@ static float getAngle(const rplidar_response_measurement_node_hq_t& node)
 
 std::string GetPort(std::string name, int number) {
     FILE *fp;
-    std::string roott = ros::package::getPath("robot_cleaner_core");
+    std::string roott = ros::package::getPath("rplidar_ros");
     std::stringstream ss;
     ss << number;
     std::string path = roott + "/scripts/get_serial_port.py '" + name + "' " + ss.str();
