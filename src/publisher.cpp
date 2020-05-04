@@ -22,18 +22,22 @@ using namespace std::chrono_literals;
 class PublisherNode : public rclcpp::Node
 {
 public:
-    PublisherNode(): Node("rplidar")
+    explicit PublisherNode(const std::string &name, int channel): Node(name+std::to_string(channel))
     {
         using std::placeholders::_1;
         using std::placeholders::_2;
-        publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", 10);
+        publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan_"+std::to_string(channel), 1);
         start_motor_service_ = this->create_service<std_srvs::srv::Empty>("start_motor", std::bind(&PublisherNode::start_motor, this, _1, _2));
         stop_motor_service_ = this->create_service<std_srvs::srv::Empty>("stop_motor", std::bind(&PublisherNode::stop_motor, this, _1, _2));
-        timer_ = this->create_wall_timer(500ms, std::bind(&PublisherNode::spin, this));
+        timer_ = this->create_wall_timer(50ms, std::bind(&PublisherNode::spin, this));
 
+        int number = -1;
+        this->declare_parameter("some_int");
+        this->get_parameter_or("some_int",number,0);
+        RCLCPP_WARN(rclcpp::get_logger("rplidar"), "NUM=%d", number);
 
         portName = "CP2102 USB to UART Bridge Controller";
-        portNumber = 1;
+        portNumber = channel;
         serial_port = "/dev/ttyUSB0";
         serial_baudrate = 115200;
         frame_id = "laser";
@@ -41,9 +45,9 @@ public:
         angle_compensate = true;
         scan_mode = "";
 
-        printf("Serial bef=%s\n", serial_port.c_str());
-        //serial_port = GetPort(portName, portNumber);
-        printf("Serial aft=%s\n", serial_port.c_str());
+        //printf("Serial bef=%s\n", serial_port.c_str());
+        serial_port = GetPort(portName, portNumber);
+        //printf("Serial aft=%s\n", serial_port.c_str());
 
         RCLCPP_INFO_STREAM(rclcpp::get_logger("rplidar"),"port  name: " << portName << " num: " << portNumber << " port: " << serial_port);
 
@@ -355,7 +359,7 @@ public:
             }
         }
         //RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"Publishing");
-        //rclcpp::spin(this->get_node_base_interface());
+
     }
 
 private:

@@ -1,0 +1,6 @@
+rplidar1:
+  ros__parameters:
+    some_int: 42
+rplidar2:
+  ros__parameters:
+    some_int: 44
