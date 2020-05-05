@@ -8,6 +8,7 @@ find_package(std_srvs REQUIRED)
 
 add_library(${PROJECT_NAME}
         src/publisher.cpp
+        src/config.cpp
         )
 
 ament_target_dependencies(${PROJECT_NAME}

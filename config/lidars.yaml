@@ -1,6 +1,7 @@
-rplidar1:
+rplidar_config:
   ros__parameters:
-    some_int: 42
-rplidar2:
-  ros__parameters:
-    some_int: 44
+    angle_compensate: true
+    inverted: false
+    frame_id: laser
+    serial_baudrate: 115200
+    portName: CP2102 USB to UART Bridge Controller

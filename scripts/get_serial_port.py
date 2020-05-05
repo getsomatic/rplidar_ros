@@ -4,6 +4,7 @@
 import sys
 import serial.tools.list_ports
 
+
 def main():
     dev_name = sys.argv[1].strip()
     dev_no = 1

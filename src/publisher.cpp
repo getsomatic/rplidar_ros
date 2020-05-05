@@ -10,6 +10,8 @@
 #include <cmath>
 #include <cassert>
 
+#include "config.cpp"
+
 #ifndef _countof
 #define _countof(_Array) (int)(sizeof(_Array) / sizeof(_Array[0]))
 #endif
@@ -22,46 +24,31 @@ using namespace std::chrono_literals;
 class PublisherNode : public rclcpp::Node
 {
 public:
-    explicit PublisherNode(const std::string &name, int channel): Node(name+std::to_string(channel))
+    explicit PublisherNode(const std::shared_ptr<Config> &config, int channel): Node(config->NodeName()+std::to_string(channel)), log_(rclcpp::get_logger(config->NodeName()+std::to_string(channel)))
     {
-        using std::placeholders::_1;
-        using std::placeholders::_2;
-        publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan_"+std::to_string(channel), 1);
-        start_motor_service_ = this->create_service<std_srvs::srv::Empty>("start_motor", std::bind(&PublisherNode::start_motor, this, _1, _2));
-        stop_motor_service_ = this->create_service<std_srvs::srv::Empty>("stop_motor", std::bind(&PublisherNode::stop_motor, this, _1, _2));
-        timer_ = this->create_wall_timer(50ms, std::bind(&PublisherNode::spin, this));
-
-        int number = -1;
-        this->declare_parameter("some_int");
-        this->get_parameter_or("some_int",number,0);
-        RCLCPP_WARN(rclcpp::get_logger("rplidar"), "NUM=%d", number);
-
-        portName = "CP2102 USB to UART Bridge Controller";
+        portName = config->portName;
         portNumber = channel;
         serial_port = "/dev/ttyUSB0";
-        serial_baudrate = 115200;
-        frame_id = "laser";
-        inverted = false;
-        angle_compensate = true;
+        serial_baudrate = config->serial_baudrate;
+        frame_id = config->frame_id;
+        inverted = config->inverted;
+        angle_compensate = config->angle_compensate;
         scan_mode = "";
 
-        //printf("Serial bef=%s\n", serial_port.c_str());
         serial_port = GetPort(portName, portNumber);
-        //printf("Serial aft=%s\n", serial_port.c_str());
-
-        RCLCPP_INFO_STREAM(rclcpp::get_logger("rplidar"),"port  name: " << portName << " num: " << portNumber << " port: " << serial_port);
+        RCLCPP_INFO_STREAM(log_,"port  name: " << portName << " num: " << portNumber << " port: " << serial_port);
 
         // create the driver instance
         drv = RPlidarDriver::CreateDriver(rp::standalone::rplidar::DRIVER_TYPE_SERIALPORT);
 
         if (!drv) {
-            RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"Create Driver fail, exit");
+            RCLCPP_ERROR(log_,"Create Driver fail, exit");
             assert(false);
         }
 
         // make connection...
         if (IS_FAIL(drv->connect(serial_port.c_str(), (_u32)serial_baudrate))) {
-            RCLCPP_ERROR(rclcpp::get_logger("rplidar"), "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
+            RCLCPP_ERROR(log_, "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
             RPlidarDriver::DisposeDriver(drv);
             assert(false);
         }
@@ -95,9 +82,9 @@ public:
                 }
 
                 if (selectedScanMode == _u16(-1)) {
-                    RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"scan mode `%s' is not supported by lidar, supported modes:", scan_mode.c_str());
+                    RCLCPP_ERROR(log_,"scan mode `%s' is not supported by lidar, supported modes:", scan_mode.c_str());
                     for (std::vector<RplidarScanMode>::iterator iter = allSupportedScanModes.begin(); iter != allSupportedScanModes.end(); iter++) {
-                        RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"\t%s: max_distance: %.1f m, Point number: %.1fK",  iter->scan_mode,
+                        RCLCPP_ERROR(log_,"\t%s: max_distance: %.1f m, Point number: %.1fK",  iter->scan_mode,
                                      iter->max_distance, (1000/iter->us_per_sample));
                     }
                     op_result = RESULT_OPERATION_FAIL;
@@ -114,14 +101,20 @@ public:
             if(angle_compensate_multiple < 1)
                 angle_compensate_multiple = 1;
             max_distance = current_scan_mode.max_distance;
-            RCLCPP_INFO(rclcpp::get_logger("rplidar"),"%s: current scan mode: %s, max_distance: %.1f m, Point number: %.1fK , angle_compensate: %d", sn.c_str(),  current_scan_mode.scan_mode,
+            RCLCPP_INFO(log_,"%s: current scan mode: %s, max_distance: %.1f m, Point number: %.1fK , angle_compensate: %d", sn.c_str(),  current_scan_mode.scan_mode,
                         current_scan_mode.max_distance, (1000/current_scan_mode.us_per_sample), angle_compensate_multiple);
         }
         else
         {
-            RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"%s: Can not start scan: %08x!", sn.c_str(), op_result);
+            RCLCPP_ERROR(log_,"%s: Can not start scan: %08x!", sn.c_str(), op_result);
         }
 
+        using std::placeholders::_1;
+        using std::placeholders::_2;
+        publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan"+sn, 1);
+        start_motor_service_ = this->create_service<std_srvs::srv::Empty>("start_motor", std::bind(&PublisherNode::start_motor, this, _1, _2));
+        stop_motor_service_ = this->create_service<std_srvs::srv::Empty>("stop_motor", std::bind(&PublisherNode::stop_motor, this, _1, _2));
+        timer_ = this->create_wall_timer(50ms, std::bind(&PublisherNode::spin, this));
     }
 
     void publish_scan(rplidar_response_measurement_node_hq_t *nodes,
@@ -188,9 +181,9 @@ public:
         op_result = drv->getDeviceInfo(devinfo);
         if (IS_FAIL(op_result)) {
             if (op_result == RESULT_OPERATION_TIMEOUT) {
-                RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"Error, operation time out. RESULT_OPERATION_TIMEOUT! ");
+                RCLCPP_ERROR(log_,"Error, operation time out. RESULT_OPERATION_TIMEOUT! ");
             } else {
-                RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"Error, unexpected error, code: %x",op_result);
+                RCLCPP_ERROR(log_,"Error, unexpected error, code: %x",op_result);
             }
             return false;
         }
@@ -198,15 +191,19 @@ public:
         // print out the device serial number, firmware and hardware version number..
         printf("RPLIDAR S/N: ");
         char s[100];
+        std::stringstream ss;
         for (int pos = 0; pos < 16 ;++pos) {
             printf("%02X", devinfo.serialnum[pos]);
+            ss << (int) devinfo.serialnum[pos] << " ";
             sprintf(s + pos * 2, "%02X", devinfo.serialnum[pos]);
         }
+
         s[32] = 0;
         sn = s;
         printf("\n");
-        RCLCPP_INFO(rclcpp::get_logger("rplidar"),"Firmware Ver: %d.%02d",devinfo.firmware_version>>8, devinfo.firmware_version & 0xFF);
-        RCLCPP_INFO(rclcpp::get_logger("rplidar"),"Hardware Rev: %d",(int)devinfo.hardware_version);
+        RCLCPP_INFO(log_,"HWID=%s", ss.str().c_str());
+        RCLCPP_INFO(log_,"Firmware Ver: %d.%02d",devinfo.firmware_version>>8, devinfo.firmware_version & 0xFF);
+        RCLCPP_INFO(log_,"Hardware Rev: %d",(int)devinfo.hardware_version);
         return true;
     }
 
@@ -217,16 +214,16 @@ public:
 
         op_result = drv->getHealth(healthinfo);
         if (IS_OK(op_result)) {
-            RCLCPP_INFO(rclcpp::get_logger("rplidar"),"RPLidar health status : %d", healthinfo.status);
+            RCLCPP_INFO(log_,"RPLidar health status : %d", healthinfo.status);
             if (healthinfo.status == RPLIDAR_STATUS_ERROR) {
-                RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"Error, rplidar internal error detected. Please reboot the device to retry.");
+                RCLCPP_ERROR(log_,"Error, rplidar internal error detected. Please reboot the device to retry.");
                 return false;
             } else {
                 return true;
             }
 
         } else {
-            RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"Error, cannot retrieve rplidar health code: %x", op_result);
+            RCLCPP_ERROR(log_,"Error, cannot retrieve rplidar health code: %x", op_result);
             return false;
         }
     }
@@ -237,7 +234,7 @@ public:
         if(!drv)
             return false;
 
-        RCLCPP_DEBUG(rclcpp::get_logger("rplidar"),"Stop motor");
+        RCLCPP_DEBUG(log_,"Stop motor");
         drv->stop();
         drv->stopMotor();
         return true;
@@ -248,7 +245,7 @@ public:
     {
         if(!drv)
             return false;
-        RCLCPP_DEBUG(rclcpp::get_logger("rplidar"),"Start motor");
+        RCLCPP_DEBUG(log_,"Start motor");
         drv->startMotor();
         drv->startScan(0,1);
         return true;
@@ -268,7 +265,7 @@ public:
         printf("Opening\n");
         fp = popen(path.c_str(), "r");
         if (fp == NULL) {
-            RCLCPP_INFO(rclcpp::get_logger("rplidar"),"failed to run command");
+            RCLCPP_INFO(log_,"failed to run command");
             return "";
         }
         printf("Opening2\n");
@@ -352,13 +349,13 @@ public:
                              frame_id);
             }
         } else {
-            RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"Invalid lidar scan result: %08x!", op_result);
+            RCLCPP_ERROR(log_,"Invalid lidar scan result: %08x!", op_result);
             if (op_result == RESULT_OPERATION_TIMEOUT){
-                RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"exiting");
+                RCLCPP_ERROR(log_,"exiting");
                 exit(1);
             }
         }
-        //RCLCPP_ERROR(rclcpp::get_logger("rplidar"),"Publishing");
+        //RCLCPP_ERROR(log_,"Publishing");
 
     }
 
@@ -388,4 +385,6 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr publisher_;
     rclcpp::Clock clock_;
+
+    rclcpp::Logger log_;
 };
