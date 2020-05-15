@@ -1,6 +1,6 @@
 #include <memory>
 #include <rclcpp/rclcpp.hpp>
-#include "publisher.cpp"
+#include <rplidar_ros/publisher.hh>
 
 // You should do "sudo chmod u=rwx,g=,o= /home/alex/development/dev_ws/src/rplidar_ros/scripts/get_serial_port.py" for this to work properly!!!
 

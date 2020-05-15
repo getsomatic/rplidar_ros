@@ -3,11 +3,11 @@
   <name>rplidar_ros</name>
   <version>1.9.0</version>
   <description>The rplidar ros package, support rplidar A2/A1 and A3</description>
-
   <maintainer email="ros@slamtec.com">Slamtec ROS Maintainer</maintainer>
   <license>BSD</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
   <depend>sensor_msgs</depend>
   <depend>rclcpp</depend>
   <depend>std_srvs</depend>
@@ -18,5 +18,4 @@
   <export>
     <build_type>ament_cmake</build_type>
   </export>
-
 </package>
