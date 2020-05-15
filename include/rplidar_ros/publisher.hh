@@ -7,7 +7,6 @@
 
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <std_srvs/srv/empty.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include "rplidar.h"
 #include <rplidar_ros/config.hh>

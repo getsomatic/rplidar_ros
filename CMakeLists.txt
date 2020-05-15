@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 
 set(RPLIDAR_SDK_PATH "./sdk/")
 FILE(GLOB RPLIDAR_SDK_SRC 
@@ -33,6 +34,7 @@ ament_target_dependencies(${PROJECT_NAME}
         rclcpp
         std_srvs
         sensor_msgs
+        ament_index_cpp
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -47,8 +49,10 @@ install(
         DESTINATION include
 )
 
-install(TARGETS rplidarNode
-        DESTINATION lib/${PROJECT_NAME})
+install(TARGETS
+        rplidarNode
+        DESTINATION
+        lib/${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
     EXPORT export_${PROJECT_NAME}

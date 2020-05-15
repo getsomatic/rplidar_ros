@@ -1,4 +1,5 @@
 #include <rplidar_ros/publisher.hh>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 PublisherNode::PublisherNode(const std::shared_ptr<Config> &config, int channel) : Node(config->NodeName()+std::to_string(channel)), log_(rclcpp::get_logger(config->NodeName()+std::to_string(channel)))
 {
