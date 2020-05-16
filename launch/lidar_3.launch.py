@@ -7,7 +7,7 @@ from ament_index_python.packages import get_package_share_directory
 from pathlib import Path
 
 package_name = "rplidar_ros"
-node_name = "rplidarNode1"
+node_name = "rplidarNode3"
 
 def generate_launch_description():
     parameters_file_path = Path(get_package_share_directory(package_name), 'config', 'lidars.yaml')

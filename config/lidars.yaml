@@ -1,4 +1,4 @@
-rplidar_config:
+rplidar:
   ros__parameters:
     angle_compensate: true
     inverted: false

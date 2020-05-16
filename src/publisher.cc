@@ -1,15 +1,52 @@
 #include <rplidar_ros/publisher.hh>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
-PublisherNode::PublisherNode(const std::shared_ptr<Config> &config, int channel) : Node(config->NodeName()+std::to_string(channel)), log_(rclcpp::get_logger(config->NodeName()+std::to_string(channel)))
+
+void PublisherNode::InitParamerers() {
+    bool noErrors = true;
+
+    this->declare_parameter("angle_compensate");
+    rclcpp::Parameter p;
+    noErrors = noErrors & this->get_parameter("angle_compensate", p);
+    angle_compensate = p.as_bool();
+    RCLCPP_DEBUG(log_, "angle_compensate=%d", angle_compensate);
+
+    this->declare_parameter("frame_id");
+    noErrors = noErrors & this->get_parameter("frame_id", frame_id);
+    RCLCPP_DEBUG(log_, "frame_id=%s", frame_id.c_str());
+
+    this->declare_parameter("portName");
+    noErrors = noErrors & this->get_parameter("portName", portName);
+    RCLCPP_DEBUG(log_, "portName=%s", portName.c_str());
+
+    this->declare_parameter("inverted");
+    noErrors = noErrors & this->get_parameter("inverted", p);
+    inverted = p.as_bool();
+    RCLCPP_DEBUG(log_, "inverted=%d", inverted);
+
+    this->declare_parameter("serial_baudrate");
+    noErrors = noErrors & this->get_parameter("serial_baudrate",serial_baudrate);
+    RCLCPP_DEBUG(log_, "serial_baudrate=%d", serial_baudrate);
+
+    if (!noErrors) {
+        RCLCPP_ERROR(log_, "Failed to load default rpLidar configuration!");
+        assert(false);
+    } else {
+        RCLCPP_ERROR(log_, "rpLidar config loaded successfully");
+    }
+}
+
+void PublisherNode::Emergency() {
+    assert(false);
+    //rclcpp::get_contexts().front()->shutdown("xxx");
+    //exit(-1);
+}
+
+PublisherNode::PublisherNode(int channel) : Node("rplidar"), log_(rclcpp::get_logger("rplidar"+std::to_string(channel)))
 {
-    portName = config->portName;
+    InitParamerers();
     portNumber = channel;
-    serial_port = "/dev/ttyUSB0";
-    serial_baudrate = config->serial_baudrate;
-    frame_id = config->frame_id;
-    inverted = config->inverted;
-    angle_compensate = config->angle_compensate;
+    serial_port = "/dev/ttyUSB*";
     scan_mode = "";
 
     serial_port = GetPort(portName, portNumber);
@@ -18,29 +55,31 @@ PublisherNode::PublisherNode(const std::shared_ptr<Config> &config, int channel)
     // create the driver instance
     drv = RPlidarDriver::CreateDriver(rp::standalone::rplidar::DRIVER_TYPE_SERIALPORT);
 
+    RCLCPP_ERROR(log_, "Checking Driver");
     if (!drv) {
         RCLCPP_ERROR(log_,"Create Driver fail, exit");
-        assert(false);
+        Emergency();
     }
-
-    // make connection...
+    RCLCPP_ERROR(log_, "Connecting");
     if (IS_FAIL(drv->connect(serial_port.c_str(), (_u32)serial_baudrate))) {
         RCLCPP_ERROR(log_, "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
         RPlidarDriver::DisposeDriver(drv);
-        assert(false);
+        Emergency();
     }
-
+    RCLCPP_ERROR(log_, "getRPLIDARDeviceInfo");
     if (!getRPLIDARDeviceInfo(drv, sn)) {
-        assert(false);
+        Emergency();
     }
-
-    // check health...
+    RCLCPP_ERROR(log_, "checkRPLIDARHealth");
     if (!checkRPLIDARHealth(drv)) {
         RPlidarDriver::DisposeDriver(drv);
-        assert(false);
+        Emergency();
     }
+    rclcpp::Rate(1).sleep();
+    RCLCPP_ERROR(log_, "Stop motor = %d", drv->stopMotor());
+    RCLCPP_ERROR(log_, "Stop = %d", drv->stop());
+    rclcpp::Rate(1).sleep();
 
-    drv->startMotor();
 
     RplidarScanMode current_scan_mode;
     if (scan_mode.empty()) {
@@ -91,7 +130,11 @@ PublisherNode::PublisherNode(const std::shared_ptr<Config> &config, int channel)
     publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan"+sn, 1);
     start_motor_service_ = this->create_service<std_srvs::srv::Empty>("start_motor", std::bind(&PublisherNode::start_motor, this, _1, _2));
     stop_motor_service_ = this->create_service<std_srvs::srv::Empty>("stop_motor", std::bind(&PublisherNode::stop_motor, this, _1, _2));
-    timer_ = this->create_wall_timer(50ms, std::bind(&PublisherNode::spin, this));
+    timer_ = this->create_wall_timer(181ms, std::bind(&PublisherNode::spin, this));
+
+    drv->startMotor();
+
+    ready_ = true;
 }
 
 void PublisherNode::publish_scan(rplidar_response_measurement_node_hq_t *nodes, size_t node_count, rclcpp::Time start,
@@ -227,10 +270,7 @@ float PublisherNode::getAngle(const rplidar_response_measurement_node_hq_t &node
 
 std::string PublisherNode::GetPort(std::string name, int number) {
     FILE *fp;
-    //std::string root;
-
-    std::string package = "rplidar_ros";
-    auto root = ament_index_cpp::get_package_share_directory(package);
+    auto root = ament_index_cpp::get_package_share_directory("rplidar_ros");
     std::stringstream ss;
     ss << number;
     std::string path = root + "/scripts/get_serial_port.py '" + name + "' " + ss.str();
@@ -328,3 +368,9 @@ void PublisherNode::spin() {
     //RCLCPP_ERROR(log_,"Publishing");
 
 }
+
+bool PublisherNode::Ready() {
+    return ready_;
+}
+
+

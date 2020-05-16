@@ -9,7 +9,6 @@
 #include <std_srvs/srv/empty.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include "rplidar.h"
-#include <rplidar_ros/config.hh>
 
 #ifndef _countof
 #define _countof(_Array) (int)(sizeof(_Array) / sizeof(_Array[0]))
@@ -23,7 +22,7 @@ using namespace std::chrono_literals;
 class PublisherNode : public rclcpp::Node
 {
 public:
-    explicit PublisherNode(const std::shared_ptr<Config> &config, int channel);
+    explicit PublisherNode(int channel);
 
     void publish_scan(rplidar_response_measurement_node_hq_t *nodes,
                       size_t node_count, rclcpp::Time start,
@@ -48,8 +47,14 @@ public:
 
     void spin();
 
-private:
+    void InitParamerers();
 
+    void Emergency();
+
+    bool Ready();
+
+private:
+    bool ready_ = false;
     std::string serial_port;
     int serial_baudrate = 115200;
     std::string frame_id;
