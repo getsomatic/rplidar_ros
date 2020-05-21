@@ -53,6 +53,8 @@ public:
 
     bool Ready();
 
+    virtual ~PublisherNode();
+
 private:
     bool ready_ = false;
     std::string serial_port;

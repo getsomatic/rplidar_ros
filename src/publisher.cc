@@ -32,21 +32,32 @@ void PublisherNode::InitParamerers() {
         RCLCPP_ERROR(log_, "Failed to load default rpLidar configuration!");
         assert(false);
     } else {
-        RCLCPP_ERROR(log_, "rpLidar config loaded successfully");
+        RCLCPP_DEBUG(log_, "rpLidar config loaded successfully");
     }
 }
 
 void PublisherNode::Emergency() {
-    assert(false);
-    //rclcpp::get_contexts().front()->shutdown("xxx");
-    //exit(-1);
+    bool scan = drv->stop();
+    bool motor = drv->stopMotor();
+    RCLCPP_FATAL(log_, "Shutting down lidar (motor[%d]; scanner[%d])", motor, scan);
+    rclcpp::shutdown();
+}
+
+PublisherNode::~PublisherNode() {
+    bool scan = drv->stop();
+    rclcpp::Rate(10).sleep();
+    bool motor = drv->stopMotor();
+    rclcpp::Rate(10).sleep();
+    RCLCPP_WARN(log_, "Destructing and shutting down rplidar%d (motor[%d] scan[%d])", portNumber, motor, scan);
+    RPlidarDriver::DisposeDriver(drv);
 }
 
 PublisherNode::PublisherNode(int channel) : Node("rplidar"), log_(rclcpp::get_logger("rplidar"+std::to_string(channel)))
 {
     InitParamerers();
     portNumber = channel;
-    serial_port = "/dev/ttyUSB*";
+    //serial_port = "/dev/ttyUSB*";
+    serial_port = "/dev/ttyUSB0";
     scan_mode = "";
 
     serial_port = GetPort(portName, portNumber);
@@ -55,30 +66,31 @@ PublisherNode::PublisherNode(int channel) : Node("rplidar"), log_(rclcpp::get_lo
     // create the driver instance
     drv = RPlidarDriver::CreateDriver(rp::standalone::rplidar::DRIVER_TYPE_SERIALPORT);
 
-    RCLCPP_ERROR(log_, "Checking Driver");
+    RCLCPP_WARN(log_, "Checking Driver");
     if (!drv) {
         RCLCPP_ERROR(log_,"Create Driver fail, exit");
         Emergency();
     }
-    RCLCPP_ERROR(log_, "Connecting");
+    RCLCPP_WARN(log_, "Connecting");
     if (IS_FAIL(drv->connect(serial_port.c_str(), (_u32)serial_baudrate))) {
         RCLCPP_ERROR(log_, "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
         RPlidarDriver::DisposeDriver(drv);
         Emergency();
     }
-    RCLCPP_ERROR(log_, "getRPLIDARDeviceInfo");
+    RCLCPP_WARN(log_, "getRPLIDARDeviceInfo");
     if (!getRPLIDARDeviceInfo(drv, sn)) {
         Emergency();
     }
-    RCLCPP_ERROR(log_, "checkRPLIDARHealth");
+    RCLCPP_WARN(log_, "checkRPLIDARHealth");
     if (!checkRPLIDARHealth(drv)) {
         RPlidarDriver::DisposeDriver(drv);
         Emergency();
     }
+    rclcpp::Rate(10).sleep();
+    RCLCPP_INFO(log_, "Stop motor = %d", drv->stopMotor());
     rclcpp::Rate(1).sleep();
-    RCLCPP_ERROR(log_, "Stop motor = %d", drv->stopMotor());
-    RCLCPP_ERROR(log_, "Stop = %d", drv->stop());
-    rclcpp::Rate(1).sleep();
+    RCLCPP_INFO(log_, "Stop = %d", drv->stop());
+    rclcpp::Rate(10).sleep();
 
 
     RplidarScanMode current_scan_mode;
@@ -100,7 +112,7 @@ PublisherNode::PublisherNode(int channel) : Node("rplidar"), log_(rclcpp::get_lo
             if (selectedScanMode == _u16(-1)) {
                 RCLCPP_ERROR(log_,"scan mode `%s' is not supported by lidar, supported modes:", scan_mode.c_str());
                 for (std::vector<RplidarScanMode>::iterator iter = allSupportedScanModes.begin(); iter != allSupportedScanModes.end(); iter++) {
-                    RCLCPP_ERROR(log_,"\t%s: max_distance: %.1f m, Point number: %.1fK",  iter->scan_mode,
+                    RCLCPP_INFO(log_,"\t%s: max_distance: %.1f m, Point number: %.1fK",  iter->scan_mode,
                                  iter->max_distance, (1000/iter->us_per_sample));
                 }
                 op_result = RESULT_OPERATION_FAIL;
@@ -130,10 +142,9 @@ PublisherNode::PublisherNode(int channel) : Node("rplidar"), log_(rclcpp::get_lo
     publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan"+sn, 1);
     start_motor_service_ = this->create_service<std_srvs::srv::Empty>("start_motor", std::bind(&PublisherNode::start_motor, this, _1, _2));
     stop_motor_service_ = this->create_service<std_srvs::srv::Empty>("stop_motor", std::bind(&PublisherNode::stop_motor, this, _1, _2));
-    timer_ = this->create_wall_timer(181ms, std::bind(&PublisherNode::spin, this));
+    timer_ = this->create_wall_timer(1ms, std::bind(&PublisherNode::spin, this));
 
     drv->startMotor();
-
     ready_ = true;
 }
 
@@ -362,7 +373,8 @@ void PublisherNode::spin() {
         RCLCPP_ERROR(log_,"Invalid lidar scan result: %08x!", op_result);
         if (op_result == RESULT_OPERATION_TIMEOUT){
             RCLCPP_ERROR(log_,"exiting");
-            exit(1);
+            rclcpp::shutdown();
+            //exit(1);
         }
     }
     //RCLCPP_ERROR(log_,"Publishing");
@@ -372,5 +384,7 @@ void PublisherNode::spin() {
 bool PublisherNode::Ready() {
     return ready_;
 }
+
+
 
 

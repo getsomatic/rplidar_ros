@@ -8,9 +8,7 @@ int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
     rclcpp::executors::MultiThreadedExecutor executor;
-
     rclcpp::Rate r(5);
-
     auto log_ = rclcpp::get_logger("rplidars");
 
     RCLCPP_WARN(log_, "Starting 1");
@@ -30,10 +28,18 @@ int main(int argc, char **argv)
     RCLCPP_WARN(log_, "Starting 3");
     auto node3 = std::make_shared<PublisherNode>(3);
     RCLCPP_WARN(log_, "Started 3\n");
+    while (!node2->Ready()){
+        r.sleep();
+    }
+
+    RCLCPP_WARN(log_, "Starting 4");
+    auto node4 = std::make_shared<PublisherNode>(4);
+    RCLCPP_WARN(log_, "Started 4\n");
 
     executor.add_node(node1);
     executor.add_node(node2);
     executor.add_node(node3);
+    executor.add_node(node4);
 
     executor.spin();
     rclcpp::shutdown();
