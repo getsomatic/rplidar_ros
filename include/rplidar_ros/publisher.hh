@@ -51,6 +51,8 @@ public:
 
     void Emergency();
 
+    void Stop();
+
     bool Ready();
 
     virtual ~PublisherNode();

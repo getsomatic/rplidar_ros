@@ -37,18 +37,22 @@ void PublisherNode::InitParamerers() {
 }
 
 void PublisherNode::Emergency() {
-    bool scan = drv->stop();
-    bool motor = drv->stopMotor();
-    RCLCPP_FATAL(log_, "Shutting down lidar (motor[%d]; scanner[%d])", motor, scan);
+    Stop();
     rclcpp::shutdown();
 }
 
+void PublisherNode::Stop() {
+    if (drv){
+        bool scan = drv->stop();
+        bool motor = drv->stopMotor();
+        RCLCPP_FATAL(log_, "Shutting down lidar (motor[%d]; scanner[%d])", motor, scan);
+        //rclcpp::Rate(1).sleep();
+    }
+}
+
 PublisherNode::~PublisherNode() {
-    bool scan = drv->stop();
-    rclcpp::Rate(10).sleep();
-    bool motor = drv->stopMotor();
-    rclcpp::Rate(10).sleep();
-    RCLCPP_WARN(log_, "Destructing and shutting down rplidar%d (motor[%d] scan[%d])", portNumber, motor, scan);
+    Stop();
+    RCLCPP_WARN(log_, "Destructing and shutting down rplidar%d", portNumber);
     RPlidarDriver::DisposeDriver(drv);
 }
 
@@ -86,12 +90,12 @@ PublisherNode::PublisherNode(int channel) : Node("rplidar"), log_(rclcpp::get_lo
         RPlidarDriver::DisposeDriver(drv);
         Emergency();
     }
-    rclcpp::Rate(10).sleep();
+    /*rclcpp::Rate(10).sleep();
     RCLCPP_INFO(log_, "Stop motor = %d", drv->stopMotor());
     rclcpp::Rate(1).sleep();
     RCLCPP_INFO(log_, "Stop = %d", drv->stop());
     rclcpp::Rate(10).sleep();
-
+*/
 
     RplidarScanMode current_scan_mode;
     if (scan_mode.empty()) {
