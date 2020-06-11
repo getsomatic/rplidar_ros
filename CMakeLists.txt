@@ -80,6 +80,14 @@ install(DIRECTORY
         DESTINATION share/${PROJECT_NAME}/
         )
 
+set(GET_PORT_FILEPATH ${CMAKE_CURRENT_SOURCE_DIR}/../../install/${PROJECT_NAME}/share/${PROJECT_NAME}/scripts)
+
+install(
+        FILES ${GET_PORT_FILEPATH}/tmp/get_serial_port.py
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+        DESTINATION ${GET_PORT_FILEPATH}
+)
+
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 ament_package()
