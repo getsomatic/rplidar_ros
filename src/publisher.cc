@@ -70,7 +70,7 @@ PublisherNode::PublisherNode(int channel) : Node("rplidar"), log_(rclcpp::get_lo
     // create the driver instance
     drv = RPlidarDriver::CreateDriver(rp::standalone::rplidar::DRIVER_TYPE_SERIALPORT);
 
-    RCLCPP_WARN(log_, "Checking Driver");
+    RCLCPP_WARN(log_, "Checking Driver --");
     if (!drv) {
         RCLCPP_ERROR(log_,"Create Driver fail, exit");
         Emergency();
