@@ -62,12 +62,12 @@ PublisherNode::~PublisherNode() {
 PublisherNode::PublisherNode(int channel) : Node("rplidar")
 , log_(rclcpp::get_logger("rplidar"+std::to_string(channel))), channel_(channel)
 {
+    InitParamerers();
     Connect();
 }
 
 void PublisherNode::Connect() {
     RCLCPP_INFO(log_,"connecting");
-    InitParamerers();
     portNumber = channel_;
     //serial_port = "/dev/ttyUSB*";
     serial_port = "/dev/ttyUSB0";
