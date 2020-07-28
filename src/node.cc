@@ -33,12 +33,12 @@ int main(int argc, char **argv)
         r.sleep();
     }
 
-    RCLCPP_WARN(log_, "Starting 4");
+    /*RCLCPP_WARN(log_, "Starting 4");
     auto node4 = std::make_shared<PublisherNode>(4);
     RCLCPP_WARN(log_, "Started 4\n");
     while (!node4->Ready()){
         r.sleep();
-    }
+    }*/
 
     rclcpp::Rate rate(1000);
     while (rclcpp::ok()) {
@@ -54,10 +54,10 @@ int main(int argc, char **argv)
         node3->Spin();
         executor.spin_node_some(node3);
         rate.sleep();
-        RCLCPP_WARN(log_, "spin 4");
+        /*RCLCPP_WARN(log_, "spin 4");
         node4->Spin();
         executor.spin_node_some(node4);
-        rate.sleep();
+        rate.sleep();*/
     }
 
     /*executor.add_node(node1);
