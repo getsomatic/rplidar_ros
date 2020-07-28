@@ -4,4 +4,4 @@ rplidar:
     inverted: false
     frame_id: laser
     serial_baudrate: 115200
-    portName: CP2102 USB to UART Bridge Controller
+    portName: Quad RS232-HS
