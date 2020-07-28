@@ -7,7 +7,7 @@
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-    rclcpp::executors::MultiThreadedExecutor executor;
+    rclcpp::executors::SingleThreadedExecutor executor;
     rclcpp::Rate r(5);
     auto log_ = rclcpp::get_logger("rplidars");
 
