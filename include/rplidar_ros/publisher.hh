@@ -45,7 +45,7 @@ public:
 
     std::string GetPort(std::string name, int number);
 
-    void Spin();
+    void spin();
 
     void InitParamerers();
 
@@ -56,6 +56,9 @@ public:
     bool Ready();
 
     virtual ~PublisherNode();
+
+private:
+    void Connect();
 
 private:
     bool ready_ = false;
@@ -79,6 +82,7 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr publisher_;
     rclcpp::Clock clock_;
+    int channel_;
 
     rclcpp::Logger log_;
 };

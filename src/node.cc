@@ -7,7 +7,7 @@
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-    rclcpp::executors::SingleThreadedExecutor executor;
+    rclcpp::executors::MultiThreadedExecutor executor;
     rclcpp::Rate r(5);
     auto log_ = rclcpp::get_logger("rplidars");
 
@@ -26,46 +26,21 @@ int main(int argc, char **argv)
     }
 
 
-    /*RCLCPP_WARN(log_, "Starting 3");
+    RCLCPP_WARN(log_, "Starting 3");
     auto node3 = std::make_shared<PublisherNode>(3);
     RCLCPP_WARN(log_, "Started 3\n");
     while (!node3->Ready()){
         r.sleep();
-    }*/
+    }
 
     RCLCPP_WARN(log_, "Starting 4");
     auto node4 = std::make_shared<PublisherNode>(4);
     RCLCPP_WARN(log_, "Started 4\n");
-    while (!node4->Ready()){
-        r.sleep();
-    }
 
-    rclcpp::Rate rate(1000);
-    while (rclcpp::ok()) {
-        RCLCPP_WARN(log_, "spin 1");
-        node1->Spin();
-        executor.spin_node_some(node1);
-        rate.sleep();
-        RCLCPP_WARN(log_, "spin 2");
-        node2->Spin();
-        executor.spin_node_some(node2);
-        rate.sleep();
-        /*RCLCPP_WARN(log_, "spin 3");
-        node3->Spin();
-        executor.spin_node_some(node3);
-        rate.sleep();*/
-        RCLCPP_WARN(log_, "spin 4");
-        node4->Spin();
-        executor.spin_node_some(node4);
-        rate.sleep();
-    }
-
-    /*executor.add_node(node1);
+    executor.add_node(node1);
     executor.add_node(node2);
     executor.add_node(node3);
     executor.add_node(node4);
-
-
 
     rclcpp::on_shutdown([&]{
         RCLCPP_FATAL(log_, "SHUTDOWN");
@@ -78,7 +53,7 @@ int main(int argc, char **argv)
         node2->Stop();
         node3->Stop();
         node4->Stop();
-    });*/
+    });
 
     executor.spin();
     rclcpp::shutdown();
