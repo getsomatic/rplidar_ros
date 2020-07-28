@@ -41,11 +41,11 @@ int main(int argc, char **argv)
     while (rclcpp::ok()) {
         executor.spin_node_some(node1);
         rate.sleep();
-        executor.spin_node_some(node1);
+        executor.spin_node_some(node2);
         rate.sleep();
-        executor.spin_node_some(node1);
+        executor.spin_node_some(node3);
         rate.sleep();
-        executor.spin_node_some(node1);
+        executor.spin_node_some(node4);
         rate.sleep();
     }
 
