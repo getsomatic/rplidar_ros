@@ -45,7 +45,7 @@ public:
 
     std::string GetPort(std::string name, int number);
 
-    void spin();
+    void Spin();
 
     void InitParamerers();
 

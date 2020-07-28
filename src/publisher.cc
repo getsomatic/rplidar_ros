@@ -146,7 +146,7 @@ PublisherNode::PublisherNode(int channel) : Node("rplidar"), log_(rclcpp::get_lo
     publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan"+sn, 1);
     start_motor_service_ = this->create_service<std_srvs::srv::Empty>("start_motor", std::bind(&PublisherNode::start_motor, this, _1, _2));
     stop_motor_service_ = this->create_service<std_srvs::srv::Empty>("stop_motor", std::bind(&PublisherNode::stop_motor, this, _1, _2));
-    timer_ = this->create_wall_timer(1ms, std::bind(&PublisherNode::spin, this));
+    //timer_ = this->create_wall_timer(1ms, std::bind(&PublisherNode::spin, this));
 
     drv->startMotor();
     ready_ = true;
@@ -303,7 +303,7 @@ std::string PublisherNode::GetPort(std::string name, int number) {
     return res;
 }
 
-void PublisherNode::spin() {
+void PublisherNode::Spin() {
     rplidar_response_measurement_node_hq_t nodes[360*8];
     size_t   count = _countof(nodes);
 

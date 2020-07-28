@@ -37,10 +37,24 @@ int main(int argc, char **argv)
     auto node4 = std::make_shared<PublisherNode>(4);
     RCLCPP_WARN(log_, "Started 4\n");
 
-    executor.add_node(node1);
+    rclcpp::Rate rate(1000);
+    while (rclcpp::ok()) {
+        executor.spin_node_some(node1);
+        rate.sleep();
+        executor.spin_node_some(node1);
+        rate.sleep();
+        executor.spin_node_some(node1);
+        rate.sleep();
+        executor.spin_node_some(node1);
+        rate.sleep();
+    }
+
+    /*executor.add_node(node1);
     executor.add_node(node2);
     executor.add_node(node3);
     executor.add_node(node4);
+
+
 
     rclcpp::on_shutdown([&]{
         RCLCPP_FATAL(log_, "SHUTDOWN");
@@ -53,7 +67,7 @@ int main(int argc, char **argv)
         node2->Stop();
         node3->Stop();
         node4->Stop();
-    });
+    });*/
 
     executor.spin();
     rclcpp::shutdown();
