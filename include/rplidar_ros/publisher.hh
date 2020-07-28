@@ -60,7 +60,7 @@ public:
 private:
     bool ready_ = false;
     std::string serial_port;
-    int serial_baudrate = 57600;
+    int serial_baudrate = 115200;
     std::string frame_id;
     bool inverted = false;
     bool angle_compensate = true;
