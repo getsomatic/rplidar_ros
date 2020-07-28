@@ -39,15 +39,19 @@ int main(int argc, char **argv)
 
     rclcpp::Rate rate(1000);
     while (rclcpp::ok()) {
+        RCLCPP_WARN(log_, "spin 1");
         node1->Spin();
         executor.spin_node_some(node1);
         rate.sleep();
+        RCLCPP_WARN(log_, "spin 2");
         node2->Spin();
         executor.spin_node_some(node2);
         rate.sleep();
+        RCLCPP_WARN(log_, "spin 3");
         node3->Spin();
         executor.spin_node_some(node3);
         rate.sleep();
+        RCLCPP_WARN(log_, "spin 4");
         node4->Spin();
         executor.spin_node_some(node4);
         rate.sleep();
