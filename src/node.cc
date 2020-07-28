@@ -18,7 +18,7 @@ int main(int argc, char **argv)
         r.sleep();
     }
 
-    /*RCLCPP_WARN(log_, "Starting 2");
+    RCLCPP_WARN(log_, "Starting 2");
     auto node2 = std::make_shared<PublisherNode>(2);
     RCLCPP_WARN(log_, "Started 2\n");
     while (!node2->Ready()){
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     }
 
 
-    RCLCPP_WARN(log_, "Starting 3");
+    /*RCLCPP_WARN(log_, "Starting 3");
     auto node3 = std::make_shared<PublisherNode>(3);
     RCLCPP_WARN(log_, "Started 3\n");
     while (!node3->Ready()){
@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 */
 
     executor.add_node(node1);
-    //executor.add_node(node2);
+    executor.add_node(node2);
     //executor.add_node(node3);
     //executor.add_node(node4);
 
@@ -47,12 +47,12 @@ int main(int argc, char **argv)
         RCLCPP_FATAL(log_, "SHUTDOWN");
         executor.cancel();
         executor.remove_node(node1);
-        /*executor.remove_node(node2);
-        executor.remove_node(node3);
+        executor.remove_node(node2);
+        /*executor.remove_node(node3);
         executor.remove_node(node4);*/
         node1->Stop();
-        /*node2->Stop();
-        node3->Stop();
+        node2->Stop();
+        /*node3->Stop();
         node4->Stop();*/
     });
 
