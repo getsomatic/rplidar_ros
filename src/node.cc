@@ -36,6 +36,9 @@ int main(int argc, char **argv)
     RCLCPP_WARN(log_, "Starting 4");
     auto node4 = std::make_shared<PublisherNode>(4);
     RCLCPP_WARN(log_, "Started 4\n");
+    while (!node4->Ready()){
+        r.sleep();
+    }
 
     rclcpp::Rate rate(1000);
     while (rclcpp::ok()) {
