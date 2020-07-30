@@ -66,6 +66,7 @@ PublisherNode::PublisherNode(int channel) : Node("rplidar_" + std::to_string(cha
     auto active = get_parameter("active").as_bool();
     if (!active) {
         RCLCPP_WARN_STREAM(log_, "lidar node " << channel_ << "is not active");
+        ready_ = true;
         return;
     }
 
