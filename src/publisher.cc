@@ -59,9 +59,16 @@ PublisherNode::~PublisherNode() {
     RPlidarDriver::DisposeDriver(drv);
 }
 
-PublisherNode::PublisherNode(int channel) : Node("rplidar")
+PublisherNode::PublisherNode(int channel) : Node("rplidar_" + std::to_string(channel))
 , log_(rclcpp::get_logger("rplidar"+std::to_string(channel))), channel_(channel)
 {
+    declare_parameter("active");
+    auto active = get_parameter("active").as_bool();
+    if (!active) {
+        RCLCPP_WARN_STREAM(log_, "lidar node " << channel_ << "is not active");
+        return;
+    }
+
     InitParamerers();
     Connect();
 }
