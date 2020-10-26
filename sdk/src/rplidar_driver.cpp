@@ -2244,7 +2244,10 @@ u_result RPlidarDriverSerial::connect(const char * port_path, _u32 baudrate, _u3
     if (!_chanDev) return RESULT_INSUFFICIENT_MEMORY;
 
     {
+        std::cout << "before mutex lock\n";
         rp::hal::AutoLocker l(_lock);
+        std::cout << "after mutex lock\n";
+
 
         // establish the serial connection...
         if (!_chanDev->bind(port_path, baudrate)  ||  !_chanDev->open()) {
