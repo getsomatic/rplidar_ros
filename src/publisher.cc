@@ -82,27 +82,27 @@ void PublisherNode::Connect() {
     scan_mode = "";
 
     serial_port = GetPort(portName, portNumber);
-    RCLCPP_INFO_STREAM(log_,"port  name: " << portName << " num: " << portNumber << " port: " << serial_port);
+    RCLCPP_DEBUG_STREAM(log_,"port  name: " << portName << " num: " << portNumber << " port: " << serial_port);
 
     // create the driver instance
     drv = RPlidarDriver::CreateDriver(rp::standalone::rplidar::DRIVER_TYPE_SERIALPORT);
 
-    RCLCPP_WARN(log_, "Checking Driver --");
+    RCLCPP_DEBUG(log_, "Checking Driver --");
     if (!drv) {
         RCLCPP_ERROR(log_,"Create Driver fail, exit");
         Emergency();
     }
-    RCLCPP_WARN(log_, "Connecting");
+    RCLCPP_DEBUG(log_, "Connecting");
     if (IS_FAIL(drv->connect(serial_port.c_str(), (_u32)serial_baudrate))) {
         RCLCPP_ERROR(log_, "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
         RPlidarDriver::DisposeDriver(drv);
         Emergency();
     }
-    RCLCPP_WARN(log_, "getRPLIDARDeviceInfo");
+    RCLCPP_DEBUG(log_, "getRPLIDARDeviceInfo");
     if (!getRPLIDARDeviceInfo(drv, sn)) {
         Emergency();
     }
-    RCLCPP_WARN(log_, "checkRPLIDARHealth");
+    RCLCPP_DEBUG(log_, "checkRPLIDARHealth");
     if (!checkRPLIDARHealth(drv)) {
         RPlidarDriver::DisposeDriver(drv);
         Emergency();
