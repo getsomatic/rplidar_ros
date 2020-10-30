@@ -244,9 +244,9 @@ bool PublisherNode::getRPLIDARDeviceInfo(RPlidarDriver *drv, std::string &sn) {
     s[32] = 0;
     sn = s;
     printf("\n");
-    RCLCPP_INFO(log_,"HWID=%s", ss.str().c_str());
-    RCLCPP_INFO(log_,"Firmware Ver: %d.%02d",devinfo.firmware_version>>8, devinfo.firmware_version & 0xFF);
-    RCLCPP_INFO(log_,"Hardware Rev: %d",(int)devinfo.hardware_version);
+    RCLCPP_DEBUG(log_,"HWID=%s", ss.str().c_str());
+    RCLCPP_DEBUG(log_,"Firmware Ver: %d.%02d",devinfo.firmware_version>>8, devinfo.firmware_version & 0xFF);
+    RCLCPP_DEBUG(log_,"Hardware Rev: %d",(int)devinfo.hardware_version);
     return true;
 }
 
@@ -256,7 +256,7 @@ bool PublisherNode::checkRPLIDARHealth(RPlidarDriver *drv) {
 
     op_result = drv->getHealth(healthinfo);
     if (IS_OK(op_result)) {
-        RCLCPP_INFO(log_,"RPLidar health status : %d", healthinfo.status);
+        RCLCPP_DEBUG(log_,"RPLidar health status : %d", healthinfo.status);
         if (healthinfo.status == RPLIDAR_STATUS_ERROR) {
             RCLCPP_ERROR(log_,"Error, rplidar internal error detected. Please reboot the device to retry.");
             return false;
