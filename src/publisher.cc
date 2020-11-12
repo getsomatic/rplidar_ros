@@ -1,6 +1,18 @@
 #include <rplidar_ros/publisher.hh>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
+PublisherNode::PublisherNode(int channel) : Node("rplidar_" + std::to_string(channel))
+        , log_(rclcpp::get_logger("rplidar"+std::to_string(channel))), channel_(channel)
+{
+    declare_parameter("active");
+    auto active = get_parameter("active").as_bool();
+    if (!active) {
+        RCLCPP_WARN_STREAM(log_, "lidar node " << channel_ << "is not active");
+        return;
+    }
+    InitParamerers();
+    timer_ = this->create_wall_timer(1ms, std::bind(&PublisherNode::Spin, this));
+}
 
 void PublisherNode::InitParamerers() {
     bool noErrors = true;
@@ -37,7 +49,11 @@ void PublisherNode::InitParamerers() {
 }
 
 void PublisherNode::Emergency() {
-    Stop();
+    try{
+        Stop();
+    } catch(...){
+        RCLCPP_ERROR_STREAM(log_, "couldn't stop on emergency. channel: " << channel_);
+    }
     if (drv){
         delete drv;
         drv = nullptr;
@@ -54,24 +70,36 @@ void PublisherNode::Stop() {
 }
 
 PublisherNode::~PublisherNode() {
-    Stop();
     RCLCPP_WARN(log_, "Destructing and shutting down rplidar%d", portNumber);
-    RPlidarDriver::DisposeDriver(drv);
+    Emergency();
 }
 
-PublisherNode::PublisherNode(int channel) : Node("rplidar_" + std::to_string(channel))
-, log_(rclcpp::get_logger("rplidar"+std::to_string(channel))), channel_(channel)
-{
-    declare_parameter("active");
-    auto active = get_parameter("active").as_bool();
-    if (!active) {
-        RCLCPP_WARN_STREAM(log_, "lidar node " << channel_ << "is not active");
-        ready_ = true;
-        return;
-    }
+void PublisherNode::Spin() {
+    if (!Connected()){
+        try{
+            Connect();
+        } catch(...) {
+            RCLCPP_ERROR_STREAM(log_, "couldn't connect. try in 5 sec. channel: " << channel_);
+            std::this_thread::sleep_for (std::chrono::seconds(5));
+        }
+    } else {
+        try{
+            ReadData();
+        } catch(...) {
+            RCLCPP_ERROR_STREAM(log_, "Error durring data reading. try to reconnect. channel: " << channel_);
+            try {
+                Emergency();
+            } catch(...) {
+                RCLCPP_ERROR_STREAM(log_, "Error on emergency stop");
+            }
+            drv = nullptr;
+        }
 
-    InitParamerers();
-    Connect();
+    }
+}
+
+bool PublisherNode::Connected() {
+    return drv != nullptr;
 }
 
 void PublisherNode::Connect() {
@@ -91,21 +119,23 @@ void PublisherNode::Connect() {
     if (!drv) {
         RCLCPP_ERROR(log_,"Create Driver fail, exit");
         Emergency();
+        return;
     }
     RCLCPP_WARN(log_, "Connecting");
     if (IS_FAIL(drv->connect(serial_port.c_str(), (_u32)serial_baudrate))) {
         RCLCPP_ERROR(log_, "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
-        RPlidarDriver::DisposeDriver(drv);
         Emergency();
+        return;
     }
     RCLCPP_WARN(log_, "getRPLIDARDeviceInfo");
     if (!getRPLIDARDeviceInfo(drv, sn)) {
         Emergency();
+        return;
     }
     RCLCPP_WARN(log_, "checkRPLIDARHealth");
     if (!checkRPLIDARHealth(drv)) {
-        RPlidarDriver::DisposeDriver(drv);
         Emergency();
+        return;
     }
 
 
@@ -158,10 +188,10 @@ void PublisherNode::Connect() {
     publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan"+sn, 1);
     start_motor_service_ = this->create_service<std_srvs::srv::Empty>("start_motor", std::bind(&PublisherNode::start_motor, this, _1, _2));
     stop_motor_service_ = this->create_service<std_srvs::srv::Empty>("stop_motor", std::bind(&PublisherNode::stop_motor, this, _1, _2));
-    timer_ = this->create_wall_timer(1ms, std::bind(&PublisherNode::spin, this));
+
 
     drv->startMotor();
-    ready_ = true;
+    RCLCPP_INFO(log_, "Successfully connected. chanel: %d", channel_);
 }
 
 void PublisherNode::publish_scan(rplidar_response_measurement_node_hq_t *nodes, size_t node_count, rclcpp::Time start,
@@ -315,7 +345,7 @@ std::string PublisherNode::GetPort(std::string name, int number) {
     return res;
 }
 
-void PublisherNode::spin() {
+void PublisherNode::ReadData() {
     rplidar_response_measurement_node_hq_t nodes[360*8];
     size_t   count = _countof(nodes);
 
@@ -390,15 +420,9 @@ void PublisherNode::spin() {
         if (op_result == RESULT_OPERATION_TIMEOUT){
             RCLCPP_ERROR(log_,"lidar operation timeout");
             Emergency();
-            Connect();
         }
     }
-    //RCLCPP_ERROR(log_,"Publishing");
 
-}
-
-bool PublisherNode::Ready() {
-    return ready_;
 }
 
 

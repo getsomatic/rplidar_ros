@@ -10,33 +10,10 @@ int main(int argc, char **argv)
     rclcpp::executors::MultiThreadedExecutor executor;
     rclcpp::Rate r(5);
     auto log_ = rclcpp::get_logger("rplidars");
-
-    RCLCPP_WARN(log_, "Starting 1");
     auto node1 = std::make_shared<PublisherNode>(1);
-    RCLCPP_WARN(log_, "Started 1\n");
-    while (!node1->Ready()){
-        r.sleep();
-    }
-
-    RCLCPP_WARN(log_, "Starting 2");
     auto node2 = std::make_shared<PublisherNode>(2);
-    RCLCPP_WARN(log_, "Started 2\n");
-    while (!node2->Ready()){
-        r.sleep();
-    }
-
-
-    RCLCPP_WARN(log_, "Starting 3");
     auto node3 = std::make_shared<PublisherNode>(3);
-    RCLCPP_WARN(log_, "Started 3\n");
-    while (!node3->Ready()){
-        r.sleep();
-    }
-
-    RCLCPP_WARN(log_, "Starting 4");
     auto node4 = std::make_shared<PublisherNode>(4);
-    RCLCPP_WARN(log_, "Started 4\n");
-
     executor.add_node(node1);
     executor.add_node(node2);
     executor.add_node(node3);
@@ -49,10 +26,10 @@ int main(int argc, char **argv)
         executor.remove_node(node2);
         executor.remove_node(node3);
         executor.remove_node(node4);
-        node1->Stop();
-        node2->Stop();
-        node3->Stop();
-        node4->Stop();
+        node1 = nullptr;
+        node2 = nullptr;
+        node3 = nullptr;
+        node4 = nullptr;
     });
 
     executor.spin();

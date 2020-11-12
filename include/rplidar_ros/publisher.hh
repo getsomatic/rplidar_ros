@@ -45,7 +45,9 @@ public:
 
     std::string GetPort(std::string name, int number);
 
-    void spin();
+    void Spin();
+
+    void ReadData();
 
     void InitParamerers();
 
@@ -53,7 +55,7 @@ public:
 
     void Stop();
 
-    bool Ready();
+    bool Connected();
 
     virtual ~PublisherNode();
 
@@ -61,7 +63,7 @@ private:
     void Connect();
 
 private:
-    bool ready_ = false;
+
     std::string serial_port;
     int serial_baudrate = 115200;
     std::string frame_id;
@@ -76,7 +78,7 @@ private:
 
     std::string sn; // get rplidar device info
 
-    RPlidarDriver * drv = nullptr;
+    RPlidarDriver * drv = nullptr;//connected
     rclcpp::Service<std_srvs::srv::Empty>::SharedPtr start_motor_service_;
     rclcpp::Service<std_srvs::srv::Empty>::SharedPtr stop_motor_service_;
     rclcpp::TimerBase::SharedPtr timer_;
