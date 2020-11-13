@@ -75,6 +75,7 @@ PublisherNode::~PublisherNode() {
 }
 
 void PublisherNode::Spin() {
+    RCLCPP_INFO_STREAM(log_, "spinning: " << channel_);
     if (!Connected()){
         try{
             Connect();
@@ -84,6 +85,7 @@ void PublisherNode::Spin() {
         }
     } else {
         try{
+            RCLCPP_INFO_STREAM(log_, "Reading data: " << channel_);
             ReadData();
         } catch(...) {
             RCLCPP_ERROR_STREAM(log_, "Error durring data reading. try to reconnect. channel: " << channel_);
