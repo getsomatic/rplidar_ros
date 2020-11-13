@@ -67,7 +67,9 @@ void PublisherNode::Emergency() {
 
 void PublisherNode::Stop() {
     if (drv){
+        RCLCPP_FATAL(log_, "before stop");
         bool scan = drv->stop(1000);
+        RCLCPP_FATAL(log_, "before stop motors");
         bool motor = drv->stopMotor();
         RCLCPP_FATAL(log_, "Shutting down lidar (motor[%d]; scanner[%d])", motor, scan);
         //rclcpp::Rate(1).sleep();
