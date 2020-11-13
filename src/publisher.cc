@@ -11,7 +11,7 @@ PublisherNode::PublisherNode(int channel) : Node("rplidar_" + std::to_string(cha
         return;
     }
     InitParamerers();
-    timer_ = this->create_wall_timer(1ms, std::bind(&PublisherNode::Spin, this));
+    timer_ = this->create_wall_timer(20ms, std::bind(&PublisherNode::Spin, this));
 }
 
 void PublisherNode::InitParamerers() {
