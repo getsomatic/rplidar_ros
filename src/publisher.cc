@@ -120,29 +120,29 @@ void PublisherNode::Connect() {
     scan_mode = "";
 
     serial_port = GetPort(portName, portNumber);
-    RCLCPP_INFO_STREAM(log_,"port  name: " << portName << " num: " << portNumber << " port: " << serial_port);
+    RCLCPP_DEBUG_STREAM(log_,"port  name: " << portName << " num: " << portNumber << " port: " << serial_port);
 
     // create the driver instance
     drv = RPlidarDriver::CreateDriver(rp::standalone::rplidar::DRIVER_TYPE_SERIALPORT);
 
-    RCLCPP_WARN(log_, "Checking Driver --");
+    RCLCPP_DEBUG(log_, "Checking Driver --");
     if (!drv) {
         RCLCPP_ERROR(log_,"Create Driver fail, exit");
         Emergency();
         return;
     }
-    RCLCPP_WARN(log_, "Connecting");
+    RCLCPP_DEBUG(log_, "Connecting");
     if (IS_FAIL(drv->connect(serial_port.c_str(), (_u32)serial_baudrate))) {
         RCLCPP_ERROR(log_, "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
         Emergency();
         return;
     }
-    RCLCPP_WARN(log_, "getRPLIDARDeviceInfo");
+    RCLCPP_DEBUG(log_, "getRPLIDARDeviceInfo");
     if (!getRPLIDARDeviceInfo(drv, sn)) {
         Emergency();
         return;
     }
-    RCLCPP_WARN(log_, "checkRPLIDARHealth");
+    RCLCPP_DEBUG(log_, "checkRPLIDARHealth");
     if (!checkRPLIDARHealth(drv)) {
         Emergency();
         return;
@@ -284,9 +284,9 @@ bool PublisherNode::getRPLIDARDeviceInfo(RPlidarDriver *drv, std::string &sn) {
     s[32] = 0;
     sn = s;
     printf("\n");
-    RCLCPP_INFO(log_,"HWID=%s", ss.str().c_str());
-    RCLCPP_INFO(log_,"Firmware Ver: %d.%02d",devinfo.firmware_version>>8, devinfo.firmware_version & 0xFF);
-    RCLCPP_INFO(log_,"Hardware Rev: %d",(int)devinfo.hardware_version);
+    RCLCPP_DEBUG(log_,"HWID=%s", ss.str().c_str());
+    RCLCPP_DEBUG(log_,"Firmware Ver: %d.%02d",devinfo.firmware_version>>8, devinfo.firmware_version & 0xFF);
+    RCLCPP_DEBUG(log_,"Hardware Rev: %d",(int)devinfo.hardware_version);
     return true;
 }
 
@@ -296,7 +296,7 @@ bool PublisherNode::checkRPLIDARHealth(RPlidarDriver *drv) {
 
     op_result = drv->getHealth(healthinfo);
     if (IS_OK(op_result)) {
-        RCLCPP_INFO(log_,"RPLidar health status : %d", healthinfo.status);
+        RCLCPP_DEBUG(log_,"RPLidar health status : %d", healthinfo.status);
         if (healthinfo.status == RPLIDAR_STATUS_ERROR) {
             RCLCPP_ERROR(log_,"Error, rplidar internal error detected. Please reboot the device to retry.");
             return false;
