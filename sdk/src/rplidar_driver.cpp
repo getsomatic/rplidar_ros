@@ -312,15 +312,12 @@ u_result RPlidarDriverImplCommon::_waitNode(rplidar_response_measurement_node_t 
    while ((waitTime=getms() - startTs) <= timeout) {
         size_t remainSize = sizeof(rplidar_response_measurement_node_t) - recvPos;
         size_t recvSize;
-        std::cout <<"a";
         bool ans = _chanDev->waitfordata(remainSize, timeout-waitTime, &recvSize);
-       std::cout <<"b";
         if(!ans) return RESULT_OPERATION_FAIL;
 
         if (recvSize > remainSize) recvSize = remainSize;
         
         recvSize = _chanDev->recvdata(recvBuffer, recvSize);
-       std::cout <<"c";
         for (size_t pos = 0; pos < recvSize; ++pos) {
             _u8 currentByte = recvBuffer[pos];
             switch (recvPos) {
@@ -352,7 +349,6 @@ u_result RPlidarDriverImplCommon::_waitNode(rplidar_response_measurement_node_t 
                 return RESULT_OK;
             }
         }
-       std::cout <<".";
     }
 
     return RESULT_OPERATION_TIMEOUT;
@@ -371,19 +367,16 @@ u_result RPlidarDriverImplCommon::_waitScanData(rplidar_response_measurement_nod
     u_result ans;
 
     while ((waitTime = getms() - startTs) <= timeout && recvNodeCount < count) {
-        std::cout << "x: " << waitTime << " " << timeout << "\n";
         rplidar_response_measurement_node_t node;
         if (IS_FAIL(ans = _waitNode(&node, timeout - waitTime))) {
             return ans;
         }
-        std::cout << "y: " << waitTime << " " << timeout << "\n";
         
         nodebuffer[recvNodeCount++] = node;
 
         if (recvNodeCount == count) return RESULT_OK;
     }
     count = recvNodeCount;
-    std::cout << "timeout worked out\n";
     return RESULT_OPERATION_TIMEOUT;
 }
 
@@ -568,15 +561,12 @@ u_result RPlidarDriverImplCommon::_cacheScanData()
 
     while(_isScanning)
     {
-        std::cout << "scan - " << _isScanning << "\n";
-        if (IS_FAIL(ans=_waitScanData(local_buf, count, 5000))) {
+        if (IS_FAIL(ans=_waitScanData(local_buf, count, 500))) {
             if (ans != RESULT_OPERATION_TIMEOUT) {
                 _isScanning = false;
                 return RESULT_OPERATION_FAIL;
             }
-            std::cout << "scan failed\n";
         }
-        std::cout << "scanned\n";
         for (size_t pos = 0; pos < count; ++pos)
         {
             if (local_buf[pos].sync_quality & RPLIDAR_RESP_MEASUREMENT_SYNCBIT)
@@ -605,7 +595,6 @@ u_result RPlidarDriverImplCommon::_cacheScanData()
                 if(_cached_scan_node_hq_count_for_interval_retrieve == _countof(_cached_scan_node_hq_buf_for_interval_retrieve)) _cached_scan_node_hq_count_for_interval_retrieve-=1; // prevent overflow
             }
         }
-        std::cout << "parsed\n";
     }
     _isScanning = false;
     return RESULT_OK;
@@ -1783,17 +1772,12 @@ u_result RPlidarDriverImplCommon::startScanExpress(bool force, _u16 scanMode, _u
 u_result RPlidarDriverImplCommon::stop(_u32 timeout)
 {
     u_result ans;
-    std::cout << "1\n";
     _disableDataGrabbing();
-    std::cout << "2\n";
     {
         rp::hal::AutoLocker l(_lock);
-        std::cout << "3\n";
         if (IS_FAIL(ans = _sendCommand(RPLIDAR_CMD_STOP))) {
-            std::cout << "4_1\n";
             return ans;
         }
-        std::cout << "4_2\n";
     }
     return RESULT_OK;
 }
@@ -2256,16 +2240,12 @@ u_result RPlidarDriverSerial::connect(const char * port_path, _u32 baudrate, _u3
     if (!_chanDev) return RESULT_INSUFFICIENT_MEMORY;
 
     {
-        std::cout << "before mutex lock\n";
         rp::hal::AutoLocker l(_lock);
-        std::cout << "after mutex lock\n";
 
 
         // establish the serial connection...
         auto bind = _chanDev->bind(port_path, baudrate);
-        std::cout << "bind\n";
         auto open = _chanDev->open();
-        std::cout << "open\n";
         if (!bind  ||  !open) {
             return RESULT_INVALID_DATA;
         }
