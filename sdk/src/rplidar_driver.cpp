@@ -562,7 +562,7 @@ u_result RPlidarDriverImplCommon::_cacheScanData()
 
     while(_isScanning)
     {
-        if (IS_FAIL(ans=_waitScanData(local_buf, count))) {
+        if (IS_FAIL(ans=_waitScanData(local_buf, count, 5000))) {
             if (ans != RESULT_OPERATION_TIMEOUT) {
                 _isScanning = false;
                 return RESULT_OPERATION_FAIL;
