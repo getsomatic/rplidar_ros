@@ -341,7 +341,7 @@ int raw_serial::waitfordata(size_t data_count, _u32 timeout, size_t * returned_s
             *returned_size =  0;
             return ANS_DEV_ERR;
         }
-        else if (n == 0)
+        else if (n == 0 || (timeout_val.tv_sec == 0 && timeout_val.tv_usec == 0))
         {
             // time out
             *returned_size =0;

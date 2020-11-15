@@ -561,7 +561,7 @@ u_result RPlidarDriverImplCommon::_cacheScanData()
 
     while(_isScanning)
     {
-        if (IS_FAIL(ans=_waitScanData(local_buf, count, 500))) {
+        if (IS_FAIL(ans=_waitScanData(local_buf, count, 200))) {
             if (ans != RESULT_OPERATION_TIMEOUT) {
                 _isScanning = false;
                 return RESULT_OPERATION_FAIL;
@@ -2254,7 +2254,7 @@ u_result RPlidarDriverSerial::connect(const char * port_path, _u32 baudrate, _u3
 
     _isConnected = true;
 
-    checkMotorCtrlSupport(_isSupportingMotorCtrl);
+    checkMotorCtrlSupport(_isSupportingMotorCtrl, 200);
     stopMotor();
 
     return RESULT_OK;
