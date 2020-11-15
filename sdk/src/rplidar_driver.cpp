@@ -368,7 +368,6 @@ u_result RPlidarDriverImplCommon::_waitScanData(rplidar_response_measurement_nod
     u_result ans;
 
     while ((waitTime = getms() - startTs) <= timeout && recvNodeCount < count) {
-        std::cout << "wt: " << waitTime << " to: " << timeout << "\n";
         rplidar_response_measurement_node_t node;
         if (IS_FAIL(ans = _waitNode(&node, timeout - waitTime))) {
             return ans;
@@ -379,6 +378,7 @@ u_result RPlidarDriverImplCommon::_waitScanData(rplidar_response_measurement_nod
         if (recvNodeCount == count) return RESULT_OK;
     }
     count = recvNodeCount;
+    std::cout << "timeout worked\n";
     return RESULT_OPERATION_TIMEOUT;
 }
 
