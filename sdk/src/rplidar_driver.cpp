@@ -562,6 +562,7 @@ u_result RPlidarDriverImplCommon::_cacheScanData()
 
     while(_isScanning)
     {
+        std::cout << "scan - " << _isScanning << "\n";
         if (IS_FAIL(ans=_waitScanData(local_buf, count, 5000))) {
             if (ans != RESULT_OPERATION_TIMEOUT) {
                 _isScanning = false;
