@@ -2250,7 +2250,11 @@ u_result RPlidarDriverSerial::connect(const char * port_path, _u32 baudrate, _u3
 
 
         // establish the serial connection...
-        if (!_chanDev->bind(port_path, baudrate)  ||  !_chanDev->open()) {
+        auto bind = _chanDev->bind(port_path, baudrate);
+        std::cout << "bind\n";
+        auto open = _chanDev->open();
+        std::cout << "open\n";
+        if (!bind  ||  !open) {
             return RESULT_INVALID_DATA;
         }
         _chanDev->flush();

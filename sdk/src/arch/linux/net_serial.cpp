@@ -96,6 +96,7 @@ bool raw_serial::bind(const char * portname, uint32_t baudrate, uint32_t flags)
 
 bool raw_serial::open(const char * portname, uint32_t baudrate, uint32_t flags)
 {
+    std::cout << "raw_serial::open\n";
     if (isOpened()) close();
     
     serial_fd = ::open(portname, O_RDWR | O_NOCTTY | O_NDELAY);

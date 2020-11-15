@@ -112,7 +112,7 @@ bool PublisherNode::Connected() {
 }
 
 void PublisherNode::Connect() {
-    RCLCPP_INFO(log_,"connecting");
+    RCLCPP_INFO(log_,"PublisherNode::Connect");
     portNumber = channel_;
     //serial_port = "/dev/ttyUSB*";
     serial_port = "/dev/ttyUSB0";
