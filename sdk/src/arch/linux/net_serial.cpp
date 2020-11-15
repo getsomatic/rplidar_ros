@@ -333,7 +333,9 @@ int raw_serial::waitfordata(size_t data_count, _u32 timeout, size_t * returned_s
     while ( isOpened() )
     {
         /* Do the select */
+        std::cout <<"((";
         int n = ::select(max_fd, &input_set, NULL, NULL, &timeout_val);
+        std::cout <<"))";
 
         if (n < 0)
         {
