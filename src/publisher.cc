@@ -51,9 +51,7 @@ void PublisherNode::InitParamerers() {
 void PublisherNode::Emergency() {
     RCLCPP_ERROR(log_,"emergency");
     try{
-        RCLCPP_ERROR(log_,"before stop");
         Stop();
-        RCLCPP_ERROR(log_,"after stop");
     } catch(...){
         RCLCPP_ERROR_STREAM(log_, "couldn't stop on emergency. channel: " << channel_);
     }

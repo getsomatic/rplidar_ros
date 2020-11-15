@@ -1774,14 +1774,17 @@ u_result RPlidarDriverImplCommon::startScanExpress(bool force, _u16 scanMode, _u
 u_result RPlidarDriverImplCommon::stop(_u32 timeout)
 {
     u_result ans;
+    std::cout << "1\n";
     _disableDataGrabbing();
-
+    std::cout << "2\n";
     {
         rp::hal::AutoLocker l(_lock);
-
+        std::cout << "3\n";
         if (IS_FAIL(ans = _sendCommand(RPLIDAR_CMD_STOP))) {
+            std::cout << "4_1\n";
             return ans;
         }
+        std::cout << "4_2\n";
     }
     return RESULT_OK;
 }
