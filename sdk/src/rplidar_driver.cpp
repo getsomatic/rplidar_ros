@@ -568,9 +568,9 @@ u_result RPlidarDriverImplCommon::_cacheScanData()
                 _isScanning = false;
                 return RESULT_OPERATION_FAIL;
             }
-            std::cout << "scan failed";
+            std::cout << "scan failed\n";
         }
-        std::cout << "scaned";
+        std::cout << "scanned\n";
         for (size_t pos = 0; pos < count; ++pos)
         {
             if (local_buf[pos].sync_quality & RPLIDAR_RESP_MEASUREMENT_SYNCBIT)
@@ -599,6 +599,7 @@ u_result RPlidarDriverImplCommon::_cacheScanData()
                 if(_cached_scan_node_hq_count_for_interval_retrieve == _countof(_cached_scan_node_hq_buf_for_interval_retrieve)) _cached_scan_node_hq_count_for_interval_retrieve-=1; // prevent overflow
             }
         }
+        std::cout << "parsed\n";
     }
     _isScanning = false;
     return RESULT_OK;
