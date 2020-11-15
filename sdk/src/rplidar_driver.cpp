@@ -568,8 +568,9 @@ u_result RPlidarDriverImplCommon::_cacheScanData()
                 _isScanning = false;
                 return RESULT_OPERATION_FAIL;
             }
+            std::cout << "scan failed";
         }
-        
+        std::cout << "scaned";
         for (size_t pos = 0; pos < count; ++pos)
         {
             if (local_buf[pos].sync_quality & RPLIDAR_RESP_MEASUREMENT_SYNCBIT)
