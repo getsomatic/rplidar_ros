@@ -333,9 +333,9 @@ int raw_serial::waitfordata(size_t data_count, _u32 timeout, size_t * returned_s
     while ( isOpened() )
     {
         /* Do the select */
-        std::cout <<"((";
+        std::cout <<"(";
         int n = ::select(max_fd, &input_set, NULL, NULL, &timeout_val);
-        std::cout <<"))";
+        std::cout <<")";
 
         if (n < 0)
         {
@@ -348,9 +348,11 @@ int raw_serial::waitfordata(size_t data_count, _u32 timeout, size_t * returned_s
             // time out
             *returned_size =0;
             return ANS_TIMEOUT;
+            std::cout <<"timeout\n";
         }
         else
         {
+            std::cout <<"<";
             if (FD_ISSET(_selfpipe[0], &input_set)) {   
                 // require aborting the current operation
                 int ch;
@@ -365,7 +367,7 @@ int raw_serial::waitfordata(size_t data_count, _u32 timeout, size_t * returned_s
                 *returned_size = 0;
                 return ANS_TIMEOUT;
             }
-
+            std::cout <<">";
             // data avaliable
             assert (FD_ISSET(serial_fd, &input_set));
 
