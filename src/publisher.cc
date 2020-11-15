@@ -14,6 +14,7 @@ PublisherNode::PublisherNode(int channel) : Node("rplidar_" + std::to_string(cha
     timer_ = this->create_wall_timer(20ms, std::bind(&PublisherNode::Spin, this));
 }
 
+
 void PublisherNode::InitParamerers() {
     bool noErrors = true;
 
@@ -66,7 +67,7 @@ void PublisherNode::Emergency() {
 void PublisherNode::Stop() {
     if (drv){
         RCLCPP_FATAL(log_, "before stop");
-        bool scan = drv->stop(1000);
+        bool scan = drv->stop(100);
         RCLCPP_FATAL(log_, "before stop motors");
         bool motor = drv->stopMotor();
         RCLCPP_FATAL(log_, "Shutting down lidar (motor[%d]; scanner[%d])", motor, scan);
@@ -80,7 +81,9 @@ PublisherNode::~PublisherNode() {
 }
 
 void PublisherNode::Spin() {
-    RCLCPP_INFO_STREAM(log_, "spinning: " << channel_);
+    if (cnt_ % 10)
+        RCLCPP_DEBUG_STREAM(log_, "spinning: " << channel_);
+    cnt_++;
     if (!Connected()){
         try{
             Connect();
@@ -90,7 +93,7 @@ void PublisherNode::Spin() {
         }
     } else {
         try{
-            RCLCPP_INFO_STREAM(log_, "Reading data: " << channel_);
+            //RCLCPP_INFO_STREAM(log_, "Reading data: " << channel_);
             ReadData();
         } catch(...) {
             RCLCPP_ERROR_STREAM(log_, "Error durring data reading. try to reconnect. channel: " << channel_);

@@ -346,7 +346,6 @@ int raw_serial::waitfordata(size_t data_count, _u32 timeout, size_t * returned_s
             // time out
             *returned_size =0;
             return ANS_TIMEOUT;
-            std::cout <<"timeout\n";
         }
         else
         {

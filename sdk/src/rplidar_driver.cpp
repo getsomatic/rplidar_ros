@@ -2236,12 +2236,9 @@ void RPlidarDriverSerial::disconnect()
 u_result RPlidarDriverSerial::connect(const char * port_path, _u32 baudrate, _u32 flag)
 {
     if (isConnected()) return RESULT_ALREADY_DONE;
-
     if (!_chanDev) return RESULT_INSUFFICIENT_MEMORY;
-
     {
         rp::hal::AutoLocker l(_lock);
-
 
         // establish the serial connection...
         auto bind = _chanDev->bind(port_path, baudrate);
@@ -2253,8 +2250,7 @@ u_result RPlidarDriverSerial::connect(const char * port_path, _u32 baudrate, _u3
     }
 
     _isConnected = true;
-
-    checkMotorCtrlSupport(_isSupportingMotorCtrl, 200);
+    checkMotorCtrlSupport(_isSupportingMotorCtrl, 100);
     stopMotor();
 
     return RESULT_OK;

@@ -85,6 +85,7 @@ private:
     rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr publisher_;
     rclcpp::Clock clock_;
     int channel_;
+    int cnt_ = 0;
 
     rclcpp::Logger log_;
 };
