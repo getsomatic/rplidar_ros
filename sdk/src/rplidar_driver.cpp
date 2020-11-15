@@ -302,7 +302,7 @@ u_result RPlidarDriverImplCommon::getFrequency(const RplidarScanMode& scanMode, 
 
 u_result RPlidarDriverImplCommon::_waitNode(rplidar_response_measurement_node_t * node, _u32 timeout)
 {
-        std::cout <<"to: " << timeout << "\n";
+
     int  recvPos = 0;
     _u32 startTs = getms();
     _u8  recvBuffer[sizeof(rplidar_response_measurement_node_t)];
@@ -351,6 +351,7 @@ u_result RPlidarDriverImplCommon::_waitNode(rplidar_response_measurement_node_t 
                 return RESULT_OK;
             }
         }
+       std::cout <<".";
     }
 
     return RESULT_OPERATION_TIMEOUT;
