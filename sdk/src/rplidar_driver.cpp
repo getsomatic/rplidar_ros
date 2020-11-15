@@ -312,14 +312,15 @@ u_result RPlidarDriverImplCommon::_waitNode(rplidar_response_measurement_node_t 
    while ((waitTime=getms() - startTs) <= timeout) {
         size_t remainSize = sizeof(rplidar_response_measurement_node_t) - recvPos;
         size_t recvSize;
-
+        std::cout <<"a";
         bool ans = _chanDev->waitfordata(remainSize, timeout-waitTime, &recvSize);
+       std::cout <<"b";
         if(!ans) return RESULT_OPERATION_FAIL;
 
         if (recvSize > remainSize) recvSize = remainSize;
         
         recvSize = _chanDev->recvdata(recvBuffer, recvSize);
-
+       std::cout <<"c";
         for (size_t pos = 0; pos < recvSize; ++pos) {
             _u8 currentByte = recvBuffer[pos];
             switch (recvPos) {
