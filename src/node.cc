@@ -10,10 +10,10 @@ int main(int argc, char **argv)
     rclcpp::executors::MultiThreadedExecutor executor;
     rclcpp::Rate r(5);
     auto log_ = rclcpp::get_logger("rplidars");
-    auto node1 = std::make_shared<PublisherNode>(1);
-    auto node2 = std::make_shared<PublisherNode>(2);
-    auto node3 = std::make_shared<PublisherNode>(3);
-    auto node4 = std::make_shared<PublisherNode>(4);
+    auto node1 = std::make_shared<PublisherNode>("fron_left");
+    auto node2 = std::make_shared<PublisherNode>("front_right");
+    auto node3 = std::make_shared<PublisherNode>("back_left");
+    auto node4 = std::make_shared<PublisherNode>("back_right");
     executor.add_node(node1);
     executor.add_node(node2);
     executor.add_node(node3);

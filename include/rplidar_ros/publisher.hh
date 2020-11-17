@@ -22,7 +22,7 @@ using namespace std::chrono_literals;
 class PublisherNode : public rclcpp::Node
 {
 public:
-    explicit PublisherNode(int channel);
+    explicit PublisherNode(const std::string & name);
 
     void publish_scan(rplidar_response_measurement_node_hq_t *nodes,
                       size_t node_count, rclcpp::Time start,
@@ -73,7 +73,6 @@ private:
     int angle_compensate_multiple = 1;//it stand of angle compensate at per 1 degree
     std::string scan_mode;
     std::string portName;
-    int portNumber;
     u_result op_result;
 
     std::string sn; // get rplidar device info
@@ -84,8 +83,7 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr publisher_;
     rclcpp::Clock clock_;
-    int channel_;
+    std::string name_;
     int cnt_ = 0;
 
-    rclcpp::Logger log_;
 };
