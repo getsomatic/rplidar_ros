@@ -27,7 +27,7 @@ void PublisherNode::InitParamerers() {
     noErrors = noErrors & this->get_parameter("frame_id", frame_id);
     RCLCPP_DEBUG(get_logger(), "frame_id=%s", frame_id.c_str());
 
-    this->declare_parameter("portName_");
+    this->declare_parameter("portName");
     noErrors = noErrors & this->get_parameter("portName", portName);
     RCLCPP_DEBUG(get_logger(), "portName=%s", portName.c_str());
 

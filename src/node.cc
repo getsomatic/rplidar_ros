@@ -8,7 +8,6 @@ int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
     rclcpp::executors::MultiThreadedExecutor executor;
-    rclcpp::Rate r(5);
     auto node1 = std::make_shared<PublisherNode>("front_left");
     auto node2 = std::make_shared<PublisherNode>("front_right");
     auto node3 = std::make_shared<PublisherNode>("back_left");
