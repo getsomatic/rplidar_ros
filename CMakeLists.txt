@@ -40,15 +40,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
-add_executable(rplidarNode1 src/node1.cc)
-target_link_libraries(rplidarNode1 ${PROJECT_NAME})
-
-add_executable(rplidarNode2 src/node2.cc)
-target_link_libraries(rplidarNode2 ${PROJECT_NAME})
-
-add_executable(rplidarNode3 src/node3.cc)
-target_link_libraries(rplidarNode3 ${PROJECT_NAME})
-
 add_executable(rplidarNode src/node.cc)
 target_link_libraries(rplidarNode ${PROJECT_NAME})
 
@@ -58,9 +49,6 @@ install(
 )
 
 install(TARGETS
-        rplidarNode1
-        rplidarNode2
-        rplidarNode3
         rplidarNode
         DESTINATION
         lib/${PROJECT_NAME})
