@@ -1,8 +1,7 @@
 #include <rplidar_ros/publisher.hh>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
-PublisherNode::PublisherNode(const std::string & name) : Node("rplidar_" + name)
-        , name_(name)
+PublisherNode::PublisherNode(const std::string & name) : Node("rplidar_" + name), name_(name)
 {
     declare_parameter("active");
     auto active = get_parameter("active").as_bool();
@@ -28,7 +27,7 @@ void PublisherNode::InitParamerers() {
     noErrors = noErrors & this->get_parameter("frame_id", frame_id);
     RCLCPP_DEBUG(get_logger(), "frame_id=%s", frame_id.c_str());
 
-    this->declare_parameter("portName_" + name_);
+    this->declare_parameter("portName_");
     noErrors = noErrors & this->get_parameter("portName", portName);
     RCLCPP_DEBUG(get_logger(), "portName=%s", portName.c_str());
 
@@ -54,7 +53,7 @@ void PublisherNode::Emergency() {
     try{
         Stop();
     } catch(...){
-        RCLCPP_ERROR_STREAM(get_logger(), "couldn't stop on emergency. channel: " << name_);
+        RCLCPP_ERROR(get_logger(), "couldn't stop on emergency");
     }
     if (drv){
         RCLCPP_ERROR(get_logger(), "deleting");
@@ -82,7 +81,7 @@ PublisherNode::~PublisherNode() {
 
 void PublisherNode::Spin() {
     if (cnt_ % 10)
-        RCLCPP_DEBUG_STREAM(get_logger(), "spinning: " << name_);
+        RCLCPP_DEBUG(get_logger(), "spinning");
     cnt_++;
     if (!Connected()){
         try{

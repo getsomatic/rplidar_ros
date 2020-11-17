@@ -9,8 +9,7 @@ int main(int argc, char **argv)
     rclcpp::init(argc, argv);
     rclcpp::executors::MultiThreadedExecutor executor;
     rclcpp::Rate r(5);
-    auto log_ = rclcpp::get_logger("rplidars");
-    auto node1 = std::make_shared<PublisherNode>("fron_left");
+    auto node1 = std::make_shared<PublisherNode>("front_left");
     auto node2 = std::make_shared<PublisherNode>("front_right");
     auto node3 = std::make_shared<PublisherNode>("back_left");
     auto node4 = std::make_shared<PublisherNode>("back_right");
@@ -20,7 +19,6 @@ int main(int argc, char **argv)
     executor.add_node(node4);
 
     rclcpp::on_shutdown([&]{
-        RCLCPP_FATAL(log_, "SHUTDOWN");
         executor.cancel();
         executor.remove_node(node1);
         executor.remove_node(node2);
