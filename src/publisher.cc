@@ -21,30 +21,30 @@ void PublisherNode::InitParamerers() {
     rclcpp::Parameter p;
     noErrors = noErrors & this->get_parameter("angle_compensate", p);
     angle_compensate = p.as_bool();
-    RCLCPP_DEBUG(get_logger(), "angle_compensate=%d", angle_compensate);
+    RCLCPP_INFO(get_logger(), "angle_compensate=%d", angle_compensate);
 
     this->declare_parameter("frame_id");
     noErrors = noErrors & this->get_parameter("frame_id", frame_id);
-    RCLCPP_DEBUG(get_logger(), "frame_id=%s", frame_id.c_str());
+    RCLCPP_INFO(get_logger(), "frame_id=%s", frame_id.c_str());
 
     this->declare_parameter("portName");
     noErrors = noErrors & this->get_parameter("portName", portName);
-    RCLCPP_DEBUG(get_logger(), "portName=%s", portName.c_str());
+    RCLCPP_INFO(get_logger(), "portName=%s", portName.c_str());
 
     this->declare_parameter("inverted");
     noErrors = noErrors & this->get_parameter("inverted", p);
     inverted = p.as_bool();
-    RCLCPP_DEBUG(get_logger(), "inverted=%d", inverted);
+    RCLCPP_INFO(get_logger(), "inverted=%d", inverted);
 
     this->declare_parameter("serial_baudrate");
     noErrors = noErrors & this->get_parameter("serial_baudrate",serial_baudrate);
-    RCLCPP_DEBUG(get_logger(), "serial_baudrate=%d", serial_baudrate);
+    RCLCPP_INFO(get_logger(), "serial_baudrate=%d", serial_baudrate);
 
     if (!noErrors) {
         RCLCPP_ERROR(get_logger(), "Failed to load default rpLidar configuration!");
         assert(false);
     } else {
-        RCLCPP_DEBUG(get_logger(), "rpLidar config loaded successfully");
+        RCLCPP_INFO(get_logger(), "rpLidar config loaded successfully");
     }
 }
 
@@ -117,18 +117,18 @@ void PublisherNode::Connect() {
     scan_mode = "";
 
     serial_port = GetPort(portName, 1);
-    RCLCPP_DEBUG_STREAM(get_logger(),"port  name: " << portName << " num: " << 1 << " port: " << serial_port);
+    RCLCPP_INFO_STREAM(get_logger(),"port  name: " << portName << " num: " << 1 << " port: " << serial_port);
 
     // create the driver instance
     drv = RPlidarDriver::CreateDriver(rp::standalone::rplidar::DRIVER_TYPE_SERIALPORT);
 
-    RCLCPP_DEBUG(get_logger(), "Checking Driver --");
+    RCLCPP_INFO(get_logger(), "Checking Driver --");
     if (!drv) {
         RCLCPP_ERROR(get_logger(),"Create Driver fail, exit");
         Emergency();
         return;
     }
-    RCLCPP_DEBUG(get_logger(), "Connecting");
+    RCLCPP_INFO(get_logger(), "Connecting");
     if (IS_FAIL(drv->connect(serial_port.c_str(), (_u32)serial_baudrate))) {
         RCLCPP_ERROR(get_logger(), "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
         Emergency();
