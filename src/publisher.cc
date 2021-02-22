@@ -192,13 +192,14 @@ void PublisherNode::Connect() {
 
     using std::placeholders::_1;
     using std::placeholders::_2;
-    publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan_" + name_, 1);
+    auto topicName = "scan_" + name_;
+    publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>(topicName, 1);
     start_motor_service_ = this->create_service<std_srvs::srv::Empty>("start_motor", std::bind(&PublisherNode::start_motor, this, _1, _2));
     stop_motor_service_ = this->create_service<std_srvs::srv::Empty>("stop_motor", std::bind(&PublisherNode::stop_motor, this, _1, _2));
 
 
     drv->startMotor();
-    RCLCPP_INFO(get_logger(), "Successfully connected. chanel");
+    RCLCPP_INFO_STREAM(get_logger(), "Successfully connected. topic name:" << topicName);
 }
 
 void PublisherNode::publish_scan(rplidar_response_measurement_node_hq_t *nodes, size_t node_count, rclcpp::Time start,
