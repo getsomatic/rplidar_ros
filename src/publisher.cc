@@ -337,7 +337,7 @@ std::string PublisherNode::GetPort(std::string name, int number) {
     auto root = ament_index_cpp::get_package_share_directory("rplidar_ros");
     std::stringstream ss;
     ss << number;
-    std::string path = "python3 "+root + "/scripts/get_serial_port.py \"" + name + "\" " + ss.str();
+    std::string path = "python3 " + root + "/scripts/get_serial_port.py \"" + name + "\" ";
     RCLCPP_WARN(get_logger(), "Path = %s", path.c_str());
     fp = popen(path.c_str(), "r");
     if (fp == NULL) {
@@ -348,9 +348,9 @@ std::string PublisherNode::GetPort(std::string name, int number) {
     char s[1035];
     while (fgets(s, sizeof(s)-1, fp) != NULL) {
         res += s;
+        RCLCPP_WARN(get_logger(), "Connecting to devise [%s]", res.c_str());
     }
 
-    RCLCPP_WARN(get_logger(), "RES = %s", res.c_str());
     pclose(fp);
     return res;
 }
