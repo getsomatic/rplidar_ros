@@ -338,7 +338,7 @@ std::string PublisherNode::GetPort(std::string name, int number) {
     std::stringstream ss;
     ss << number;
     std::string path = root + "/scripts/get_serial_port.py \"" + name + "\" " + ss.str();
-    RCLCPP_DEBUG(get_logger(), "Path = %s", path.c_str());
+    RCLCPP_WARN(get_logger(), "Path = %s", path.c_str());
     fp = popen(path.c_str(), "r");
     if (fp == NULL) {
         RCLCPP_INFO(get_logger(), "failed to run command");
@@ -349,6 +349,8 @@ std::string PublisherNode::GetPort(std::string name, int number) {
     while (fgets(s, sizeof(s)-1, fp) != NULL) {
         res += s;
     }
+
+    RCLCPP_WARN(get_logger(), "RES = %s", res.c_str());
     pclose(fp);
     return res;
 }
