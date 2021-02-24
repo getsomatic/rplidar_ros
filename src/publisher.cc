@@ -128,7 +128,7 @@ void PublisherNode::Connect() {
         Emergency();
         return;
     }
-    RCLCPP_INFO(get_logger(), "Connecting");
+    RCLCPP_INFO(get_logger(), "Connecting to serial port \"%s\" with baudrate [%d]", serial_port.c_str(), serial_baudrate);
     if (IS_FAIL(drv->connect(serial_port.c_str(), (_u32)serial_baudrate))) {
         RCLCPP_ERROR(get_logger(), "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
         Emergency();
@@ -337,7 +337,8 @@ std::string PublisherNode::GetPort(std::string name, int number) {
     auto root = ament_index_cpp::get_package_share_directory("rplidar_ros");
     std::stringstream ss;
     ss << number;
-    std::string path = "python3 " + root + "/scripts/get_serial_port.py '" + name + "' " + ss.str();
+    std::string path = root + "/scripts/get_serial_port.py \"" + name + "\" " + ss.str();
+    RCLCPP_DEBUG(get_logger(), "Path = %s", path.c_str());
     fp = popen(path.c_str(), "r");
     if (fp == NULL) {
         RCLCPP_INFO(get_logger(), "failed to run command");
