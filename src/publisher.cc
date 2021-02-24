@@ -337,7 +337,7 @@ std::string PublisherNode::GetPort(std::string name, int number) {
     auto root = ament_index_cpp::get_package_share_directory("rplidar_ros");
     std::stringstream ss;
     ss << number;
-    std::string path = root + "/scripts/get_serial_port.py \"" + name + "\" " + ss.str();
+    std::string path = "python3 "+root + "/scripts/get_serial_port.py \"" + name + "\" " + ss.str();
     RCLCPP_WARN(get_logger(), "Path = %s", path.c_str());
     fp = popen(path.c_str(), "r");
     if (fp == NULL) {
