@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(bcr_core REQUIRED)
 
 set(RPLIDAR_SDK_PATH "./sdk/")
 FILE(GLOB RPLIDAR_SDK_SRC 
@@ -34,6 +35,7 @@ ament_target_dependencies(${PROJECT_NAME}
         std_srvs
         sensor_msgs
         ament_index_cpp
+        bcr_core
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -62,19 +64,9 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 install(DIRECTORY
-        launch
-        config
         scripts
         DESTINATION share/${PROJECT_NAME}/
         )
-
-set(GET_PORT_FILEPATH ${CMAKE_CURRENT_SOURCE_DIR}/../../install/${PROJECT_NAME}/share/${PROJECT_NAME}/scripts)
-
-install(
-        FILES ${GET_PORT_FILEPATH}/tmp/get_serial_port.py
-        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-        DESTINATION ${GET_PORT_FILEPATH}
-)
 
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})

@@ -1,5 +1,6 @@
 #include <rplidar_ros/publisher.hh>
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <bcr_core/tools/status/status_helper.hh>
 
 PublisherNode::PublisherNode(const std::string & name) : Node("rplidar_" + name), name_(name)
 {
@@ -10,7 +11,8 @@ PublisherNode::PublisherNode(const std::string & name) : Node("rplidar_" + name)
         return;
     }
     InitParamerers();
-    timer_ = this->create_wall_timer(20ms, std::bind(&PublisherNode::Spin, this));
+    status_ = std::make_shared<bcr::core::tools::status::StatusHelper>(get_node_base_interface()->get_name(), *this);
+    timer_ = this->create_wall_timer(20ms, std::bind(&PublisherNode::Tick, this));
 }
 
 
@@ -21,24 +23,22 @@ void PublisherNode::InitParamerers() {
     rclcpp::Parameter p;
     noErrors = noErrors & this->get_parameter("angle_compensate", p);
     angle_compensate = p.as_bool();
-    RCLCPP_INFO(get_logger(), "angle_compensate=%d", angle_compensate);
 
     this->declare_parameter("frame_id");
     noErrors = noErrors & this->get_parameter("frame_id", frame_id);
-    RCLCPP_INFO(get_logger(), "frame_id=%s", frame_id.c_str());
 
     this->declare_parameter("portName");
     noErrors = noErrors & this->get_parameter("portName", portName);
-    RCLCPP_INFO(get_logger(), "portName=%s", portName.c_str());
 
     this->declare_parameter("inverted");
     noErrors = noErrors & this->get_parameter("inverted", p);
     inverted = p.as_bool();
-    RCLCPP_INFO(get_logger(), "inverted=%d", inverted);
 
     this->declare_parameter("serial_baudrate");
     noErrors = noErrors & this->get_parameter("serial_baudrate",serial_baudrate);
-    RCLCPP_INFO(get_logger(), "serial_baudrate=%d", serial_baudrate);
+
+    RCLCPP_DEBUG(get_logger(), "portName=%s serial_baudrate=%d", portName.c_str(),  serial_baudrate);
+    RCLCPP_DEBUG(get_logger(), "frame_id=%s angle_compensate=%d inverted=%d", frame_id.c_str(), inverted, angle_compensate);
 
     if (!noErrors) {
         RCLCPP_ERROR(get_logger(), "Failed to load default rpLidar configuration!");
@@ -79,7 +79,9 @@ PublisherNode::~PublisherNode() {
     Emergency();
 }
 
-void PublisherNode::Spin() {
+void PublisherNode::Tick() {
+    status_->BeginTick();
+    status_->AddStatus(portName, serialPortName_, serialPortName_.empty() ? bcr::core::tools::status::Status::ERROR : bcr::core::tools::status::Status::OK);
     if (cnt_ % 10)
         RCLCPP_DEBUG(get_logger(), "spinning");
     cnt_++;
@@ -105,6 +107,7 @@ void PublisherNode::Spin() {
         }
 
     }
+    status_->EndTick();
 }
 
 bool PublisherNode::Connected() {
@@ -116,8 +119,7 @@ void PublisherNode::Connect() {
     serial_port = "";
     scan_mode = "";
 
-    serial_port = GetPort(portName, 1);
-    RCLCPP_INFO_STREAM(get_logger(),"port  name: " << portName << " num: " << 1 << " port: " << serial_port);
+    serial_port = GetPort(portName);
 
     // create the driver instance
     drv = RPlidarDriver::CreateDriver(rp::standalone::rplidar::DRIVER_TYPE_SERIALPORT);
@@ -128,7 +130,7 @@ void PublisherNode::Connect() {
         Emergency();
         return;
     }
-    RCLCPP_INFO(get_logger(), "Connecting to serial port \"%s\" with baudrate [%d]", serial_port.c_str(), serial_baudrate);
+    RCLCPP_INFO(get_logger(), "Connecting to serial port [%s] with path [%s] with baudrate [%d]", portName.c_str(), serial_port.c_str(), serial_baudrate);
     if (IS_FAIL(drv->connect(serial_port.c_str(), (_u32)serial_baudrate))) {
         RCLCPP_ERROR(get_logger(), "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
         Emergency();
@@ -182,7 +184,7 @@ void PublisherNode::Connect() {
         if(angle_compensate_multiple < 1)
             angle_compensate_multiple = 1;
         max_distance = current_scan_mode.max_distance;
-        RCLCPP_INFO(get_logger(),"%s: current scan mode: %s, max_distance: %.1f m, Point number: %.1fK , angle_compensate: %d", sn.c_str(),  current_scan_mode.scan_mode,
+        RCLCPP_DEBUG(get_logger(),"%s: current scan mode: %s, max_distance: %.1f m, Point number: %.1fK , angle_compensate: %d", sn.c_str(),  current_scan_mode.scan_mode,
                     current_scan_mode.max_distance, (1000/current_scan_mode.us_per_sample), angle_compensate_multiple);
     }
     else
@@ -198,7 +200,7 @@ void PublisherNode::Connect() {
 
 
     drv->startMotor();
-    RCLCPP_INFO(get_logger(), "Successfully connected. chanel");
+    RCLCPP_INFO(get_logger(), "Successfully connected. channel");
 }
 
 void PublisherNode::publish_scan(rplidar_response_measurement_node_hq_t *nodes, size_t node_count, rclcpp::Time start,
@@ -332,25 +334,21 @@ float PublisherNode::getAngle(const rplidar_response_measurement_node_hq_t &node
     return node.angle_z_q14 * 90.f / 16384.f;
 }
 
-std::string PublisherNode::GetPort(std::string name, int number) {
+std::string PublisherNode::GetPort(std::string name) {
     FILE *fp;
-    auto root = ament_index_cpp::get_package_share_directory("rplidar_ros");
-    std::stringstream ss;
-    ss << number;
+    auto root = ament_index_cpp::get_package_share_directory("bcr_core");
     std::string path = "python3 " + root + "/scripts/get_serial_port.py \"" + name + "\" ";
-    RCLCPP_WARN(get_logger(), "Path = %s", path.c_str());
     fp = popen(path.c_str(), "r");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         RCLCPP_INFO(get_logger(), "failed to run command");
         return "";
     }
     std::string res;
     char s[1035];
-    while (fgets(s, sizeof(s)-1, fp) != NULL) {
+    while (fgets(s, sizeof(s)-1, fp) != nullptr) {
         res += s;
-        RCLCPP_WARN(get_logger(), "Connecting to devise [%s]", res.c_str());
     }
-
+    serialPortName_ = res;
     pclose(fp);
     return res;
 }

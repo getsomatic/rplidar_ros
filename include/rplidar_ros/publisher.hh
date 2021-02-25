@@ -16,6 +16,11 @@
 
 #define DEG2RAD(x) ((x)*M_PI/180.)
 
+namespace bcr::core::tools::status{
+    class StatusHelper;
+}
+
+
 using namespace rp::standalone::rplidar;
 using namespace std::chrono_literals;
 
@@ -43,9 +48,9 @@ public:
 
     static float getAngle(const rplidar_response_measurement_node_hq_t& node);
 
-    std::string GetPort(std::string name, int number);
+    std::string GetPort(std::string name);
 
-    void Spin();
+    void Tick();
 
     void ReadData();
 
@@ -85,5 +90,6 @@ private:
     rclcpp::Clock clock_;
     std::string name_;
     int cnt_ = 0;
-
+    std::shared_ptr<bcr::core::tools::status::StatusHelper> status_;
+    std::string serialPortName_;
 };
