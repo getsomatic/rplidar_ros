@@ -336,9 +336,8 @@ float PublisherNode::getAngle(const rplidar_response_measurement_node_hq_t &node
 std::string PublisherNode::GetPort(std::string name, int number) {
     FILE *fp;
     auto root = ament_index_cpp::get_package_share_directory("rplidar_ros");
-    std::stringstream ss;
-    ss << number;
-    std::string path = root + "/scripts/get_serial_port.py '" + name + "' " + ss.str();
+
+    std::string path = "python3 " + root + "/scripts/get_serial_port.py '" + name + "' ";
     fp = popen(path.c_str(), "r");
     if (fp == NULL) {
         RCLCPP_INFO(get_logger(), "failed to run command");
