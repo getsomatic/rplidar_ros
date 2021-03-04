@@ -15,13 +15,13 @@ PublisherNode::PublisherNode(const std::string & name) : Node("rplidar_" + name)
     timer_ = this->create_wall_timer(20ms, std::bind(&PublisherNode::Tick, this));
 
     if (name == "front_left") {
-        serialPortName_ = "ttyUSB1";
+        serialPortName_ = "ttyS1";
     } else if (name == "front_right") {
-        serialPortName_ = "ttyUSB2";
+        serialPortName_ = "ttyS2";
     } else if (name == "back_left") {
-        serialPortName_ = "ttyUSB3";
+        serialPortName_ = "ttyS3";
     } else if (name == "back_right") {
-        serialPortName_ = "ttyUSB4";
+        serialPortName_ = "ttyS4";
     }
 }
 
