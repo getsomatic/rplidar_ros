@@ -126,7 +126,7 @@ bool PublisherNode::Connected() {
 
 void PublisherNode::Connect() {
     RCLCPP_INFO(get_logger(),"PublisherNode::Connect");
-    serial_port = "";
+    serialPortName_ = "";
     scan_mode = "";
 
     // create the driver instance
@@ -138,9 +138,9 @@ void PublisherNode::Connect() {
         Emergency();
         return;
     }
-    RCLCPP_INFO(get_logger(), "Connecting to serial port [%s] with path [%s] with baudrate [%d]", portName.c_str(), serial_port.c_str(), serial_baudrate);
-    if (IS_FAIL(drv->connect(serial_port.c_str(), (_u32)serial_baudrate))) {
-        RCLCPP_ERROR(get_logger(), "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
+    RCLCPP_INFO(get_logger(), "Connecting to serial port [%s] with path [%s] with baudrate [%d]", portName.c_str(), serialPortName_.c_str(), serial_baudrate);
+    if (IS_FAIL(drv->connect(serialPortName_.c_str(), (_u32)serial_baudrate))) {
+        RCLCPP_ERROR(get_logger(), "Error, cannot bind to the specified serial port %s.",serialPortName_.c_str());
         Emergency();
         return;
     }
