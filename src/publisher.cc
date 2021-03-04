@@ -13,6 +13,16 @@ PublisherNode::PublisherNode(const std::string & name) : Node("rplidar_" + name)
     InitParamerers();
     status_ = std::make_shared<bcr::core::tools::status::StatusHelper>(get_node_base_interface()->get_name(), *this);
     timer_ = this->create_wall_timer(20ms, std::bind(&PublisherNode::Tick, this));
+
+    if (name == "front_left") {
+        serialPortName_ = "ttyUSB1";
+    } else if (name == "front_right") {
+        serialPortName_ = "ttyUSB2";
+    } else if (name == "back_left") {
+        serialPortName_ = "ttyUSB3";
+    } else if (name == "back_right") {
+        serialPortName_ = "ttyUSB4";
+    }
 }
 
 
@@ -118,8 +128,6 @@ void PublisherNode::Connect() {
     RCLCPP_INFO(get_logger(),"PublisherNode::Connect");
     serial_port = "";
     scan_mode = "";
-
-    serial_port = GetPort(portName);
 
     // create the driver instance
     drv = RPlidarDriver::CreateDriver(rp::standalone::rplidar::DRIVER_TYPE_SERIALPORT);
@@ -332,25 +340,6 @@ PublisherNode::start_motor(std_srvs::srv::Empty::Request::SharedPtr req, std_srv
 
 float PublisherNode::getAngle(const rplidar_response_measurement_node_hq_t &node) {
     return node.angle_z_q14 * 90.f / 16384.f;
-}
-
-std::string PublisherNode::GetPort(std::string name) {
-    FILE *fp;
-    auto root = ament_index_cpp::get_package_share_directory("bcr_core");
-    std::string path = "python3 " + root + "/scripts/get_serial_port.py \"" + name + "\" ";
-    fp = popen(path.c_str(), "r");
-    if (fp == nullptr) {
-        RCLCPP_INFO(get_logger(), "failed to run command");
-        return "";
-    }
-    std::string res;
-    char s[1035];
-    while (fgets(s, sizeof(s)-1, fp) != nullptr) {
-        res += s;
-    }
-    serialPortName_ = res;
-    pclose(fp);
-    return res;
 }
 
 void PublisherNode::ReadData() {
