@@ -126,7 +126,6 @@ bool PublisherNode::Connected() {
 
 void PublisherNode::Connect() {
     RCLCPP_INFO(get_logger(),"PublisherNode::Connect");
-    serialPortName_ = "";
     scan_mode = "";
 
     // create the driver instance
