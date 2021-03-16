@@ -11,7 +11,7 @@ PublisherNode::PublisherNode(const std::string & name) : Node("rplidar_" + name)
         return;
     }
     InitParamerers();
-    status_ = std::make_shared<bcr::core::tools::status::StatusHelper>(get_node_base_interface()->get_name(), *this);
+    status_ = std::make_shared<bcr::core::tools::status::StatusHelper>(std::string("lidars/") + get_node_base_interface()->get_name(), *this);
     timer_ = this->create_wall_timer(20ms, std::bind(&PublisherNode::Tick, this));
 }
 
@@ -201,7 +201,7 @@ void PublisherNode::Connect() {
 
 
     drv->startMotor();
-    RCLCPP_INFO_STREAM(get_logger(), "Successfully connected. topic name:" << topicName);
+    RCLCPP_INFO(get_logger(), "Successfully connected. chanel");
 }
 
 void PublisherNode::publish_scan(rplidar_response_measurement_node_hq_t *nodes, size_t node_count, rclcpp::Time start,
