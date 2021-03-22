@@ -81,7 +81,7 @@ PublisherNode::~PublisherNode() {
 
 void PublisherNode::Tick() {
     status_->BeginTick();
-    status_->AddStatus(portName, serialPortName_, serialPortName_.empty() ? bcr::core::tools::status::Status::ERROR : bcr::core::tools::status::Status::OK);
+    status_->AddStatus(portName, serialPortName_, serialPortName_.empty() ? bcr::core::tools::status::Status::STOP : bcr::core::tools::status::Status::OK);
     if (cnt_ % 10)
         RCLCPP_DEBUG(get_logger(), "spinning");
     cnt_++;
