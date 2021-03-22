@@ -11,7 +11,7 @@ PublisherNode::PublisherNode(const std::string & name) : Node("rplidar_" + name)
         return;
     }
     InitParamerers();
-    status_ = std::make_shared<bcr::core::tools::status::StatusHelper>(get_node_base_interface()->get_name(), *this);
+    status_ = std::make_shared<bcr::core::tools::status::StatusHelper>(std::string("lidars/") + get_node_base_interface()->get_name(), *this);
     timer_ = this->create_wall_timer(20ms, std::bind(&PublisherNode::Tick, this));
 
     if (name == "front_left") {
@@ -91,7 +91,7 @@ PublisherNode::~PublisherNode() {
 
 void PublisherNode::Tick() {
     status_->BeginTick();
-    status_->AddStatus(portName, serialPortName_, serialPortName_.empty() ? bcr::core::tools::status::Status::ERROR : bcr::core::tools::status::Status::OK);
+    status_->AddStatus(portName, serialPortName_, serialPortName_.empty() ? bcr::core::tools::status::Status::STOP : bcr::core::tools::status::Status::OK);
     if (cnt_ % 10)
         RCLCPP_DEBUG(get_logger(), "spinning");
     cnt_++;
@@ -201,13 +201,14 @@ void PublisherNode::Connect() {
 
     using std::placeholders::_1;
     using std::placeholders::_2;
-    publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan_" + name_, 1);
+    auto topicName = "scan_" + name_;
+    publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>(topicName, 1);
     start_motor_service_ = this->create_service<std_srvs::srv::Empty>("start_motor", std::bind(&PublisherNode::start_motor, this, _1, _2));
     stop_motor_service_ = this->create_service<std_srvs::srv::Empty>("stop_motor", std::bind(&PublisherNode::stop_motor, this, _1, _2));
 
 
     drv->startMotor();
-    RCLCPP_INFO(get_logger(), "Successfully connected. channel");
+    RCLCPP_INFO(get_logger(), "Successfully connected. chanel");
 }
 
 void PublisherNode::publish_scan(rplidar_response_measurement_node_hq_t *nodes, size_t node_count, rclcpp::Time start,
