@@ -117,7 +117,7 @@ bool PublisherNode::Connected() {
 void PublisherNode::Connect() {
     RCLCPP_INFO(get_logger(),"PublisherNode::Connect");
     serial_port = "";
-    scan_mode = "";
+    scan_mode = "Boost";
 
     serial_port = GetPort(portName);
 
@@ -158,6 +158,7 @@ void PublisherNode::Connect() {
         if (IS_OK(op_result)) {
             _u16 selectedScanMode = _u16(-1);
             for (std::vector<RplidarScanMode>::iterator iter = allSupportedScanModes.begin(); iter != allSupportedScanModes.end(); iter++) {
+                RCLCPP_INFO_STREAM(get_logger(),"scan mode: " << iter->scan_mode);
                 if (iter->scan_mode == scan_mode) {
                     selectedScanMode = iter->id;
                     break;
