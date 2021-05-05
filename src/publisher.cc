@@ -365,18 +365,18 @@ void PublisherNode::ReadData() {
     double scan_duration;
 
     start_scan_time = clock_.now();
-    RCLCPP_INFO(get_logger(), "drv->grabScanDataHq");
+    //RCLCPP_INFO(get_logger(), "drv->grabScanDataHq");
     op_result = drv->grabScanDataHq(nodes, count);
     end_scan_time = clock_.now();
     scan_duration = (end_scan_time - start_scan_time).seconds();
 
     if (op_result == RESULT_OK) {
-        RCLCPP_INFO(get_logger(), "RESULT_OK");
+        //RCLCPP_INFO(get_logger(), "RESULT_OK");
         op_result = drv->ascendScanData(nodes, count);
         float angle_min = DEG2RAD(0.0f);
         float angle_max = DEG2RAD(359.0f);
         if (op_result == RESULT_OK) {
-            RCLCPP_INFO(get_logger(), "drv->ascendScanData RESULT_OK");
+            //RCLCPP_INFO(get_logger(), "drv->ascendScanData RESULT_OK");
             if (angle_compensate) {
                 //const int angle_compensate_multiple = 1;
                 const int angle_compensate_nodes_count = 360*angle_compensate_multiple;
