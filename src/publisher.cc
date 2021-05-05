@@ -366,7 +366,7 @@ void PublisherNode::ReadData() {
 
     start_scan_time = clock_.now();
     RCLCPP_INFO(get_logger(), "drv->grabScanDataHq");
-    op_result = drv->grabScanDataHq(nodes, count, 3000);
+    op_result = drv->grabScanDataHq(nodes, count);
     end_scan_time = clock_.now();
     scan_duration = (end_scan_time - start_scan_time).seconds();
 
