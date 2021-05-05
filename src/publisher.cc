@@ -201,7 +201,7 @@ void PublisherNode::Connect() {
 
 
     drv->startMotor();
-    RCLCPP_INFO(get_logger(), "Successfully connected. chanel");
+    RCLCPP_INFO(get_logger(), "Successfully connected");
 }
 
 void PublisherNode::publish_scan(rplidar_response_measurement_node_hq_t *nodes, size_t node_count, rclcpp::Time start,
@@ -364,15 +364,18 @@ void PublisherNode::ReadData() {
     double scan_duration;
 
     start_scan_time = clock_.now();
-    op_result = drv->grabScanDataHq(nodes, count);
+    RCLCPP_INFO(get_logger(), "drv->grabScanDataHq");
+    op_result = drv->grabScanDataHq(nodes, count, 3);
     end_scan_time = clock_.now();
     scan_duration = (end_scan_time - start_scan_time).seconds();
 
     if (op_result == RESULT_OK) {
+        RCLCPP_INFO(get_logger(), "RESULT_OK");
         op_result = drv->ascendScanData(nodes, count);
         float angle_min = DEG2RAD(0.0f);
         float angle_max = DEG2RAD(359.0f);
         if (op_result == RESULT_OK) {
+            RCLCPP_INFO(get_logger(), "drv->ascendScanData RESULT_OK");
             if (angle_compensate) {
                 //const int angle_compensate_multiple = 1;
                 const int angle_compensate_nodes_count = 360*angle_compensate_multiple;
