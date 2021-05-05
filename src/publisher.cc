@@ -117,7 +117,7 @@ bool PublisherNode::Connected() {
 void PublisherNode::Connect() {
     RCLCPP_INFO(get_logger(),"PublisherNode::Connect");
     serial_port = "";
-    scan_mode = "Boost";
+    scan_mode = "Standard";
 
     serial_port = GetPort(portName);
 
