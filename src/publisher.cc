@@ -126,7 +126,8 @@ bool PublisherNode::Connected() {
 
 void PublisherNode::Connect() {
     RCLCPP_INFO(get_logger(),"PublisherNode::Connect");
-    scan_mode = "";
+    serial_port = "";
+    scan_mode = "Standard";
 
     // create the driver instance
     drv = RPlidarDriver::CreateDriver(rp::standalone::rplidar::DRIVER_TYPE_SERIALPORT);
@@ -165,6 +166,7 @@ void PublisherNode::Connect() {
         if (IS_OK(op_result)) {
             _u16 selectedScanMode = _u16(-1);
             for (std::vector<RplidarScanMode>::iterator iter = allSupportedScanModes.begin(); iter != allSupportedScanModes.end(); iter++) {
+                RCLCPP_INFO_STREAM(get_logger(),"scan mode: " << iter->scan_mode);
                 if (iter->scan_mode == scan_mode) {
                     selectedScanMode = iter->id;
                     break;
@@ -208,7 +210,7 @@ void PublisherNode::Connect() {
 
 
     drv->startMotor();
-    RCLCPP_INFO(get_logger(), "Successfully connected. chanel");
+    RCLCPP_INFO(get_logger(), "Successfully connected");
 }
 
 void PublisherNode::publish_scan(rplidar_response_measurement_node_hq_t *nodes, size_t node_count, rclcpp::Time start,
@@ -352,15 +354,18 @@ void PublisherNode::ReadData() {
     double scan_duration;
 
     start_scan_time = clock_.now();
+    //RCLCPP_INFO(get_logger(), "drv->grabScanDataHq");
     op_result = drv->grabScanDataHq(nodes, count);
     end_scan_time = clock_.now();
     scan_duration = (end_scan_time - start_scan_time).seconds();
 
     if (op_result == RESULT_OK) {
+        //RCLCPP_INFO(get_logger(), "RESULT_OK");
         op_result = drv->ascendScanData(nodes, count);
         float angle_min = DEG2RAD(0.0f);
         float angle_max = DEG2RAD(359.0f);
         if (op_result == RESULT_OK) {
+            //RCLCPP_INFO(get_logger(), "drv->ascendScanData RESULT_OK");
             if (angle_compensate) {
                 //const int angle_compensate_multiple = 1;
                 const int angle_compensate_nodes_count = 360*angle_compensate_multiple;
