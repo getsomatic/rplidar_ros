@@ -19,9 +19,9 @@ PublisherNode::PublisherNode(const std::string & name) : Node("rplidar_" + name)
     } else if (name == "front_right") {
         serialPortName_ = "/dev/ttyS3";
     } else if (name == "back_left") {
-        serialPortName_ = "/dev/ttyS4";
-    } else if (name == "back_right") {
         serialPortName_ = "/dev/ttyS5";
+    } else if (name == "back_right") {
+        serialPortName_ = "/dev/ttyS4";
     }
 }
 
