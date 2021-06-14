@@ -68,8 +68,6 @@ private:
     void Connect();
 
 private:
-
-    std::string serial_port;
     int serial_baudrate = 115200;
     std::string frame_id;
     bool inverted = false;
