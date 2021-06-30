@@ -39,10 +39,10 @@ class Event
 {
 public:
     
-    enum
+    enum : unsigned long
     {
         EVENT_OK = 1,
-        EVENT_TIMEOUT = -1,
+        EVENT_TIMEOUT = 0xFFFFFFFF,
         EVENT_FAILED = 0,
     };
     
