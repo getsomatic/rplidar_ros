@@ -13,6 +13,16 @@ PublisherNode::PublisherNode(const std::string & name) : Node("rplidar_" + name)
     InitParamerers();
     status_ = std::make_shared<bcr::core::tools::status::StatusHelper>(std::string("lidars/") + get_node_base_interface()->get_name(), *this);
     timer_ = this->create_wall_timer(20ms, std::bind(&PublisherNode::Tick, this));
+
+    if (name == "front_left") {
+        serialPortName_ = "/dev/ttyS2";
+    } else if (name == "front_right") {
+        serialPortName_ = "/dev/ttyS3";
+    } else if (name == "back_left") {
+        serialPortName_ = "/dev/ttyS5";
+    } else if (name == "back_right") {
+        serialPortName_ = "/dev/ttyS4";
+    }
 }
 
 
@@ -116,10 +126,7 @@ bool PublisherNode::Connected() {
 
 void PublisherNode::Connect() {
     RCLCPP_INFO(get_logger(),"PublisherNode::Connect");
-    serial_port = "";
     scan_mode = "Standard";
-
-    serial_port = GetPort(portName);
 
     // create the driver instance
     drv = RPlidarDriver::CreateDriver(rp::standalone::rplidar::DRIVER_TYPE_SERIALPORT);
@@ -130,9 +137,9 @@ void PublisherNode::Connect() {
         Emergency();
         return;
     }
-    RCLCPP_INFO(get_logger(), "Connecting to serial port [%s] with path [%s] with baudrate [%d]", portName.c_str(), serial_port.c_str(), serial_baudrate);
-    if (IS_FAIL(drv->connect(serial_port.c_str(), (_u32)serial_baudrate))) {
-        RCLCPP_ERROR(get_logger(), "Error, cannot bind to the specified serial port %s.",serial_port.c_str());
+    RCLCPP_INFO(get_logger(), "Connecting to serial port [%s] with path [%s] with baudrate [%d]", portName.c_str(), serialPortName_.c_str(), serial_baudrate);
+    if (IS_FAIL(drv->connect(serialPortName_.c_str(), (_u32)serial_baudrate))) {
+        RCLCPP_ERROR(get_logger(), "Error, cannot bind to the specified serial port %s.",serialPortName_.c_str());
         Emergency();
         return;
     }
@@ -334,25 +341,6 @@ PublisherNode::start_motor(std_srvs::srv::Empty::Request::SharedPtr req, std_srv
 
 float PublisherNode::getAngle(const rplidar_response_measurement_node_hq_t &node) {
     return node.angle_z_q14 * 90.f / 16384.f;
-}
-
-std::string PublisherNode::GetPort(std::string name) {
-    FILE *fp;
-    auto root = ament_index_cpp::get_package_share_directory("bcr_core");
-    std::string path = "python3 " + root + "/scripts/get_serial_port.py \"" + name + "\" ";
-    fp = popen(path.c_str(), "r");
-    if (fp == nullptr) {
-        RCLCPP_INFO(get_logger(), "failed to run command");
-        return "";
-    }
-    std::string res;
-    char s[1035];
-    while (fgets(s, sizeof(s)-1, fp) != nullptr) {
-        res += s;
-    }
-    serialPortName_ = res;
-    pclose(fp);
-    return res;
 }
 
 void PublisherNode::ReadData() {
